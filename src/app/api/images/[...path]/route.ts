@@ -234,7 +234,7 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   const buffer = Buffer.from(await upstream.arrayBuffer());
-  let sourceBuffer = buffer;
+  let sourceBuffer: Buffer<ArrayBufferLike> = buffer;
   if (removeBg) {
     const upstreamContentType = upstream.headers.get("content-type")?.split(";")[0] ?? "application/octet-stream";
     try {
