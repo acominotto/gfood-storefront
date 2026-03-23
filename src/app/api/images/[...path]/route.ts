@@ -1,5 +1,4 @@
 import sharp from "sharp";
-import { removeBackground } from "@imgly/background-removal-node";
 import { env } from "@/lib/env";
 import { checkRateLimit } from "@/server/rate-limit";
 import { jsonError } from "@/server/api-response";
@@ -238,6 +237,10 @@ export async function GET(request: Request, { params }: Params) {
   if (removeBg) {
     const upstreamContentType = upstream.headers.get("content-type")?.split(";")[0] ?? "application/octet-stream";
     try {
+      // Load only when needed: @imgly/background-removal-node pulls in onnxruntime-node (native
+      // .node/.dll/.so). A static import would initialize that for every image request and can
+      // break the whole route on serverless (e.g. Vercel) when the runtime binary fails to load.
+      const { removeBackground } = await import("@imgly/background-removal-node");
       // The background-removal library relies on Blob MIME type detection.
       // Passing a raw Buffer causes format detection to fail and returns the original image.
       const result = await removeBackground(new Blob([buffer], { type: upstreamContentType }), {
