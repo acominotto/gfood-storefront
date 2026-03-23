@@ -1,10 +1,10 @@
 "use client";
 
-import { Box, Button, Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
-import { useLocale, useTranslations } from "next-intl";
-import { signOut, useSession } from "next-auth/react";
 import { NavCartPopover } from "@/components/nav-cart-popover";
 import { Link } from "@/i18n/navigation";
+import { Box, Button, Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
+import { signOut, useSession } from "next-auth/react";
+import { useLocale, useTranslations } from "next-intl";
 
 export function TopNav() {
   const t = useTranslations();
@@ -35,7 +35,6 @@ export function TopNav() {
           alt="G-Food logo"
           h="40px"
           w="auto"
-          fallbackSrc="/product-placeholder.svg"
         />
         <Stack gap={0}>
           <Text fontWeight="bold" color="gray.800" lineHeight="short">
