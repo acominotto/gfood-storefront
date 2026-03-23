@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "catalog": "Shop",
+    "checkout": "Checkout",
+    "login": "Login",
+    "cart": "Cart",
+    "items": "items",
+    "total": "Total",
+    "viewCart": "View cart",
+    "goToCheckout": "Go to checkout",
+    "cartLoading": "Loading cart...",
+    "cartError": "Unable to load your cart right now.",
+    "cartEmpty": "Your cart is empty.",
+    "andMore": "+{count} more"
+  },
+  "catalog": {
+    "title": "Products",
+    "searchPlaceholder": "Search products",
+    "inStockOnly": "In stock only",
+    "category": "Category",
+    "minPrice": "Min price",
+    "maxPrice": "Max price",
+    "apply": "Apply",
+    "addToCart": "Add",
+    "removeFromCart": "Remove from cart",
+    "noResults": "No products found"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "submit": "Place order"
+  },
+  "auth": {
+    "title": "Sign in",
+    "google": "Continue with Google",
+    "logout": "Sign out"
+  },
+  "footer": {
+    "impressum": "Legal notice"
+  },
+  "impressum": {
+    "metaTitle": "Legal notice | G-Food",
+    "metaDescription": "Legal notice and contact details for CoFood Sàrl, G-Food.",
+    "title": "Legal notice",
+    "company": "CoFood Sàrl",
+    "street": "Route de Vevey 130",
+    "city": "CH-1630 Bulle",
+    "websiteLabel": "Website",
+    "websiteUrl": "https://www.g-food.ch",
+    "websiteDisplay": "www.g-food.ch",
+    "contactTitle": "Contact",
+    "emailLabel": "E-mail",
+    "emailAddress": "e-mail@g-food.ch",
+    "phoneLabel": "Tel.",
+    "phoneDisplay": "+41 79 349 18 77",
+    "phoneHref": "tel:+41793491877",
+    "contactFormLabel": "Contact form",
+    "contactFormUrl": "https://g-food.ch/contactez-nous/",
+    "hoursLabel": "Opening hours",
+    "hours": "Monday to Friday: 08:00 – 17:00"
+  }
+}
