@@ -28,7 +28,7 @@ export async function getFacets() {
 }
 
 export async function addToCart(productId: number) {
-  const response = await apiClient.post("cart/items", {
+  const response = await apiClient.post("woo/cart/add-item", {
     json: {
       id: productId,
       quantity: 1,
@@ -38,7 +38,7 @@ export async function addToCart(productId: number) {
 }
 
 export async function setCartItemQuantity(key: string, quantity: number) {
-  const response = await apiClient.patch(`cart/items/${key}`, {
+  const response = await apiClient.patch(`woo/cart/update-item?key=${encodeURIComponent(key)}`, {
     json: {
       quantity,
     },
@@ -47,6 +47,6 @@ export async function setCartItemQuantity(key: string, quantity: number) {
 }
 
 export async function removeCartItem(key: string) {
-  const response = await apiClient.delete(`cart/items/${key}`);
+  const response = await apiClient.delete(`woo/cart/remove-item?key=${encodeURIComponent(key)}`);
   return cartResponseSchema.parse(await response.json());
 }

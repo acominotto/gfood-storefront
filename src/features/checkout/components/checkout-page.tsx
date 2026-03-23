@@ -37,12 +37,12 @@ export function CheckoutPage() {
 
   const cartQuery = useQuery({
     queryKey: ["cart"],
-    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("cart")).json()),
+    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("woo/cart")).json()),
   });
 
   const checkoutMutation = useMutation({
     mutationFn: async () =>
-      apiClient.post("checkout", {
+      apiClient.post("woo/checkout", {
         json: {
           billing_address: {
             first_name: form.first_name,

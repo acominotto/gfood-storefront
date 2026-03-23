@@ -43,7 +43,7 @@ export function NavCartPopover() {
 
   const cartQuery = useQuery({
     queryKey: ["cart"],
-    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("cart")).json()),
+    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("woo/cart")).json()),
   });
 
   const cartItems = cartQuery.data?.items ?? [];

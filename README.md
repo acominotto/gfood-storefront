@@ -37,10 +37,7 @@ npm run dev
 
 - `GET /api/catalog/products`
 - `GET /api/catalog/facets`
-- `GET|POST /api/cart`
-- `POST /api/cart/items`
-- `PATCH|DELETE /api/cart/items/:key`
-- `POST /api/checkout`
+- `GET|POST|PATCH|PUT|DELETE /api/woo/*` proxy to WooCommerce Store API (same-origin; avoids CORS to WordPress)
 - `GET /api/auth/me`
 - `GET /api/images/*` optimized image proxy
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).

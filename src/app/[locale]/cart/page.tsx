@@ -9,19 +9,20 @@ export default function CartPage() {
   const queryClient = useQueryClient();
   const cartQuery = useQuery({
     queryKey: ["cart"],
-    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("cart")).json()),
+    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("woo/cart")).json()),
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ key, quantity }: { key: string; quantity: number }) =>
-      apiClient.patch(`cart/items/${key}`, { json: { quantity } }),
+      apiClient.patch(`woo/cart/update-item?key=${encodeURIComponent(key)}`, { json: { quantity } }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (key: string) => apiClient.delete(`cart/items/${key}`),
+    mutationFn: async (key: string) =>
+      apiClient.delete(`woo/cart/remove-item?key=${encodeURIComponent(key)}`),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
