@@ -1,11 +1,33 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { CartDeliveryLine } from "@/components/cart-delivery-line";
+import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { useCartStore } from "@/features/cart/store/cart-store";
+import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
 import { Box, Card, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 
+function CartFeeRow({ fee, cartCurrency }: { fee: CartFeeLine; cartCurrency: string | null | undefined }) {
+  const locale = useLocale();
+  const currency = fee.totals?.currency_code ?? cartCurrency;
+  const lineText = formatCartMoney(fee.totals?.total ?? null, currency, locale);
+  return (
+    <Box borderWidth="1px" rounded="md" p={3} bg="gray.50">
+      <HStack justify="space-between" align="flex-start" gap={3}>
+        <Text fontWeight="medium" color="gray.700">
+          {fee.name}
+        </Text>
+        <Text fontWeight="semibold">{lineText}</Text>
+      </HStack>
+    </Box>
+  );
+}
+
 export default function CartPage() {
+  const tCatalog = useTranslations("catalog");
+  const tNav = useTranslations("nav");
+  const locale = useLocale();
   const cart = useCartStore((s) => s.cart);
   const status = useCartStore((s) => s.status);
   const ensureCartLoaded = useCartStore((s) => s.ensureCartLoaded);
@@ -36,33 +58,41 @@ export default function CartPage() {
           {cart?.items?.map((item) => (
             <Box key={item.key} borderWidth="1px" rounded="md" p={3}>
               <Text fontWeight="semibold">{item.name}</Text>
-              <HStack mt={2}>
-                <Button
-                  size="sm"
+              <Box mt={2}>
+                <CartQuantityRow
+                  quantity={item.quantity}
                   disabled={busy}
-                  onClick={() => updateItemQuantity(item.key, item.quantity + 1, item.id)}
-                >
-                  +
-                </Button>
-                <Text>{item.quantity}</Text>
-                <Button
-                  size="sm"
-                  disabled={busy}
-                  onClick={() => {
+                  onDecrease={() => {
                     if (item.quantity <= 1) {
                       return removeItem(item.key, item.id);
                     }
                     return updateItemQuantity(item.key, item.quantity - 1, item.id);
                   }}
-                >
-                  -
-                </Button>
-                <Button size="sm" variant="outline" disabled={busy} onClick={() => removeItem(item.key, item.id)}>
-                  Remove
-                </Button>
-              </HStack>
+                  onIncrease={() => updateItemQuantity(item.key, item.quantity + 1, item.id)}
+                  onRemove={() => removeItem(item.key, item.id)}
+                  removeAriaLabel={tCatalog("removeFromCart")}
+                />
+              </Box>
             </Box>
           ))}
+          {cart?.fees?.map((fee) => (
+            <CartFeeRow key={fee.key} fee={fee} cartCurrency={cart?.totals?.currency_code} />
+          ))}
+          {(cart?.items?.length ?? 0) > 0 ? (
+            <Stack gap={3} pt={2} borderTopWidth="1px" borderColor="gray.200">
+              <CartDeliveryLine
+                label={tNav("delivery")}
+                amountMinor={cart?.totals?.total_shipping}
+                currency={cart?.totals?.currency_code}
+              />
+              <HStack justify="space-between">
+                <Text fontWeight="semibold">{tNav("total")}</Text>
+                <Text fontWeight="bold">
+                  {formatCartMoney(cart?.totals?.total_price, cart?.totals?.currency_code, locale)}
+                </Text>
+              </HStack>
+            </Stack>
+          ) : null}
         </Stack>
       </Card.Body>
     </Card.Root>

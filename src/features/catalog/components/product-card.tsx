@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
 import type { Product } from "@/server/schemas/catalog";
-import { Badge, Box, Card, HStack, IconButton, Image, Stack, Text } from "@chakra-ui/react";
+import { Badge, Box, Card, HStack, Image, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
-import { FiTrash2 } from "react-icons/fi";
 
 type ProductCardProps = {
   product: Product;
@@ -26,7 +26,10 @@ function toPlainText(html: string | undefined) {
   if (!html) {
     return "";
   }
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = html;
+  const decoded = textarea.value;
+  return decoded.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
@@ -128,27 +131,14 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
         </HStack>
         <Box mt={3} flexShrink={0} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
           {quantity > 0 ? (
-            <HStack gap={2}>
-              <Button size="sm" onClick={() => onDecrease()} variant="outline" colorPalette="brand" disabled={isUpdatingCart}>
-                -
-              </Button>
-              <Text minW="24px" textAlign="center" fontWeight="semibold" flex="1">
-                {quantity}
-              </Text>
-              <Button size="sm" variant="outline" colorPalette="brand" onClick={() => onIncrease()} disabled={isUpdatingCart}>
-                +
-              </Button>
-              <IconButton
-                aria-label={t("removeFromCart")}
-                size="sm"
-                variant="ghost"
-                colorPalette="brand"
-                onClick={() => void onRemove()}
-                disabled={isUpdatingCart}
-              >
-                <FiTrash2 />
-              </IconButton>
-            </HStack>
+            <CartQuantityRow
+              quantity={quantity}
+              disabled={isUpdatingCart}
+              onDecrease={() => onDecrease()}
+              onIncrease={() => onIncrease()}
+              onRemove={() => onRemove()}
+              removeAriaLabel={t("removeFromCart")}
+            />
           ) : (
             <Button
               size="sm"

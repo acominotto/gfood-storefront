@@ -91,6 +91,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
 
   addItem: async (productId) => {
+    await get().ensureCartLoaded();
     set({ mutatingProductId: productId, error: null });
     try {
       const cart = await addToCartRequest(productId);
@@ -104,6 +105,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
 
   updateItemQuantity: async (key, quantity, productId) => {
+    await get().ensureCartLoaded();
     const fromCart = get().cart?.items.find((i) => i.key === key)?.id;
     set({ mutatingProductId: productId ?? fromCart ?? null, error: null });
     try {
@@ -118,6 +120,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
 
   removeItem: async (key, productId) => {
+    await get().ensureCartLoaded();
     const fromCart = get().cart?.items.find((i) => i.key === key)?.id;
     set({ mutatingProductId: productId ?? fromCart ?? null, error: null });
     try {

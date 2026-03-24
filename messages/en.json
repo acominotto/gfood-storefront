@@ -45,7 +45,7 @@
   "delivery": {
     "title": "Delivery",
     "intro": "We deliver within Switzerland. Timeframes and service areas may vary; we will confirm details when you place your order.",
-    "freeFrom": "Delivery is free on orders of CHF 100 or more (incl. VAT).",
+    "freeFrom": "Delivery is free on orders of CHF {amount} or more (incl. VAT).",
     "note": "Summary information only — final terms are confirmed at checkout.",
     "close": "Close"
   },

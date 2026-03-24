@@ -21,7 +21,6 @@ export function NavCartButton() {
         variant="outline"
         bg="white"
         _dark={{ bg: "brand.900" }}
-        aria-label={t("cart")}
         aria-haspopup="dialog"
         onClick={() => openCart()}
       >

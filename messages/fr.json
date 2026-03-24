@@ -45,7 +45,7 @@
   "delivery": {
     "title": "Livraison",
     "intro": "Nous livrons en Suisse. Les délais et zones desservies peuvent varier ; les informations précises vous seront communiquées lors de la validation de votre commande.",
-    "freeFrom": "Les frais de port sont offerts pour toute commande d'un montant total d'au moins 100 CHF (TVA incluse).",
+    "freeFrom": "Les frais de port sont offerts pour toute commande d'un montant total d'au moins {amount} CHF (TVA incluse).",
     "note": "Texte indicatif — conditions définitives confirmées au moment du paiement.",
     "close": "Fermer"
   },

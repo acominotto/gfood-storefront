@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import type { CheckoutPayload } from "@/features/catalog/api";
-import { Box, Card, Grid, Input, Stack, Text, Textarea } from "@chakra-ui/react";
-import { useTranslations } from "next-intl";
+import { CartDeliveryLine } from "@/components/cart-delivery-line";
+import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
+import { Box, Card, Grid, HStack, Input, Stack, Text, Textarea } from "@chakra-ui/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type FormState = {
@@ -31,8 +33,28 @@ const defaults: FormState = {
   note: "",
 };
 
+function CheckoutFeeRow({ fee, cartCurrency }: { fee: CartFeeLine; cartCurrency: string | null | undefined }) {
+  const locale = useLocale();
+  const currency = fee.totals?.currency_code ?? cartCurrency;
+  const lineText = formatCartMoney(fee.totals?.total ?? null, currency, locale);
+  return (
+    <Box py={2} borderBottomWidth="1px" borderColor="gray.100">
+      <HStack justify="space-between" gap={3}>
+        <Text fontSize="sm" color="fg.muted">
+          {fee.name}
+        </Text>
+        <Text fontSize="sm" fontWeight="medium">
+          {lineText}
+        </Text>
+      </HStack>
+    </Box>
+  );
+}
+
 export function CheckoutPage() {
   const t = useTranslations("checkout");
+  const tNav = useTranslations("nav");
+  const locale = useLocale();
   const [form, setForm] = useState<FormState>(defaults);
   const cart = useCartStore((s) => s.cart);
   const ensureCartLoaded = useCartStore((s) => s.ensureCartLoaded);
@@ -150,6 +172,29 @@ export function CheckoutPage() {
               </Text>
             </Box>
           ))}
+          {cart?.fees?.map((fee) => (
+            <CheckoutFeeRow key={fee.key} fee={fee} cartCurrency={cart?.totals?.currency_code} />
+          ))}
+          {(cart?.items?.length ?? 0) > 0 ? (
+            <>
+              <CartDeliveryLine
+                label={tNav("delivery")}
+                amountMinor={cart?.totals?.total_shipping}
+                currency={cart?.totals?.currency_code}
+                variant="checkout"
+              />
+              <Box py={2} borderTopWidth="1px" borderColor="gray.200">
+                <HStack justify="space-between" gap={3}>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {tNav("total")}
+                  </Text>
+                  <Text fontSize="sm" fontWeight="bold">
+                    {formatCartMoney(cart?.totals?.total_price, cart?.totals?.currency_code, locale)}
+                  </Text>
+                </HStack>
+              </Box>
+            </>
+          ) : null}
         </Card.Body>
       </Card.Root>
     </Grid>

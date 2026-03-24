@@ -45,7 +45,7 @@
   "delivery": {
     "title": "Lieferung",
     "intro": "Wir liefern in der Schweiz. Lieferzeiten und Gebiete können variieren; Details bestätigen wir bei Ihrer Bestellung.",
-    "freeFrom": "Der Versand ist kostenlos ab einem Bestellwert von mindestens 100 CHF (inkl. MWSt.).",
+    "freeFrom": "Der Versand ist kostenlos ab einem Bestellwert von mindestens {amount} CHF (inkl. MWSt.).",
     "note": "Hinweis — endgültige Konditionen werden an der Kasse bestätigt.",
     "close": "Schließen"
   },

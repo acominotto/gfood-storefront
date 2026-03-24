@@ -1,5 +1,6 @@
 "use client";
 
+import { DELIVERY_FREE_THRESHOLD_CHF } from "@/constants/delivery";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,7 +44,9 @@ export function NavDeliveryDialog() {
             <Dialog.Body py={6}>
               <Stack gap={4}>
                 <Text color="gray.700">{t("intro")}</Text>
-                <Text color="gray.700">{t("freeFrom")}</Text>
+                <Text color="gray.700">
+                  {t("freeFrom", { amount: DELIVERY_FREE_THRESHOLD_CHF })}
+                </Text>
                 <Text fontSize="sm" color="gray.600">
                   {t("note")}
                 </Text>

@@ -1,6 +1,21 @@
 import type { CartResponse } from "@/server/schemas/cart";
 
 export type CartLineItem = NonNullable<CartResponse["items"]>[number];
+export type CartFeeLine = NonNullable<CartResponse["fees"]>[number];
+
+/** Decode numeric/named HTML entities in WooCommerce / API product names. */
+export function decodeHtmlEntities(text: string): string {
+  if (!text) {
+    return text;
+  }
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&nbsp;/gi, "\u00a0")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&");
+}
 
 export function formatCartMoney(
   amount: string | null | undefined,
@@ -51,6 +66,35 @@ export function cartItemUnitPriceMinor(item: CartLineItem): string | null {
       return null;
     }
     return String(Math.round(t / item.quantity));
+  }
+  return null;
+}
+
+/**
+ * Line total in minor units for display: prefers Store API `line_total`, then `line_subtotal`,
+ * otherwise `unit price × quantity` when a unit price can be resolved.
+ */
+export function cartItemLineTotalMinor(item: CartLineItem): string | null {
+  const lt = item.prices?.line_total;
+  if (lt != null && lt !== "") {
+    const n = Number(lt);
+    if (Number.isFinite(n)) {
+      return lt;
+    }
+  }
+  const sub = item.prices?.line_subtotal;
+  if (sub != null && sub !== "") {
+    const n = Number(sub);
+    if (Number.isFinite(n)) {
+      return sub;
+    }
+  }
+  const unit = cartItemUnitPriceMinor(item);
+  if (unit != null && item.quantity > 0) {
+    const u = Number(unit);
+    if (Number.isFinite(u)) {
+      return String(Math.round(u * item.quantity));
+    }
   }
   return null;
 }

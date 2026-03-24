@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { env } from "@/lib/env";
+import {
+  defaultTitle,
+  description,
+  opengraphImageAlt,
+  opengraphImageSize,
+  siteName,
+} from "@/lib/site-metadata";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -8,11 +15,6 @@ const montserrat = Montserrat({
   variable: "--font-heading",
   display: "swap",
 });
-
-const siteName = "GASHI International Food";
-const defaultTitle = "G-Food — GASHI International Food";
-const description =
-  "International food delivered in Switzerland. Les saveurs d’ailleurs — order online with G-Food.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -26,19 +28,18 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: siteName,
-  openGraph: {
-    type: "website",
-    locale: "fr_CH",
-    alternateLocale: ["en_CH", "de_CH", "it_CH"],
-    url: "/fr",
-    siteName,
-    title: defaultTitle,
-    description,
-  },
   twitter: {
     card: "summary_large_image",
     title: defaultTitle,
     description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: opengraphImageSize.width,
+        height: opengraphImageSize.height,
+        alt: opengraphImageAlt,
+      },
+    ],
   },
 };
 

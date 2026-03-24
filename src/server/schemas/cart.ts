@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const nullableString = z.string().nullable().optional();
+
 
 export const cartItemSchema = z.object({
   key: z.string(),
@@ -17,27 +17,44 @@ export const cartItemSchema = z.object({
     .default([]),
   prices: z
     .object({
-      currency_code: nullableString,
+      currency_code: z.string().nullish(),
       /** Unit price in minor units (WooCommerce Store API). */
-      price: nullableString,
-      line_total: nullableString,
-      line_subtotal: nullableString,
+      price: z.string().nullish(),
+      line_total: z.string().nullish(),
+      line_subtotal: z.string().nullish(),
     })
     .optional(),
 });
 
 export const cartTotalsSchema = z
   .object({
-    currency_code: nullableString,
-    total_items: nullableString,
-    total_price: nullableString,
-    total_tax: nullableString,
-    total_shipping: nullableString,
+    currency_code: z.string().nullish(),
+    total_items: z.string().nullish(),
+    total_price: z.string().nullish(),
+    total_tax: z.string().nullish(),
+    total_shipping: z.string().nullish(),
+    total_fees: z.string().nullish(),
+    total_fees_tax: z.string().nullish(),
   })
   .optional();
 
+/** WooCommerce Store API `fees` (e.g. delivery surcharges from `woocommerce_cart_calculate_fees`). */
+export const cartFeeSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  totals: z
+    .object({
+      total: z.string().nullish(),
+      total_tax: z.string().nullish(),
+      currency_code: z.string().nullish(),
+    })
+    .passthrough()
+    .optional(),
+});
+
 export const cartResponseSchema = z.object({
   items: z.array(cartItemSchema).default([]),
+  fees: z.array(cartFeeSchema).default([]),
   items_count: z.coerce.number().optional(),
   totals: cartTotalsSchema,
 });

@@ -45,7 +45,7 @@
   "delivery": {
     "title": "Consegna",
     "intro": "Consegniamo in Svizzera. Tempi e zone possono variare; i dettagli saranno confermati al momento dell'ordine.",
-    "freeFrom": "La consegna è gratuita per ordini da almeno 100 CHF (IVA inclusa).",
+    "freeFrom": "La consegna è gratuita per ordini da almeno {amount} CHF (IVA inclusa).",
     "note": "Testo indicativo — condizioni definitive confermate al pagamento.",
     "close": "Chiudi"
   },
