@@ -1,17 +1,19 @@
 "use client";
 
-import { getFacets, getProducts } from "@/features/catalog/api";
+import { useCartStore } from "@/features/cart/store/cart-store";
+import { CatalogFilters } from "@/features/catalog/components/filters";
 import { ProductCard } from "@/features/catalog/components/product-card";
 import { useCatalogFilterStore } from "@/features/catalog/store/catalog-filters";
+import { selectHasNextPage, useProductsStore } from "@/features/catalog/store/products-store";
+import { useSyncCatalogProducts } from "@/features/catalog/store/use-sync-catalog-products";
 import type { Product } from "@/server/schemas/catalog";
+import { Button } from "@/components/ui/button";
 import {
   Box,
-  Button,
-  Checkbox,
   Flex,
   Grid,
+  Heading,
   HStack,
-  Input,
   Pagination,
   SimpleGrid,
   Spinner,
@@ -19,7 +21,6 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -33,20 +34,21 @@ function compareProductsByStockThenTitle(a: Product, b: Product) {
   return a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true });
 }
 
-/** Matches `SimpleGrid` `columns` so each loaded page is full rows. */
-const CATALOG_GRID_COLUMNS = { base: 1, sm: 2, md: 3, lg: 3, xl: 4 } as const;
-const ROWS_PER_CATALOG_PAGE = 3;
+/** Matches `SimpleGrid` `columns` so each loaded page is full rows. Max columns × rows ≤ 48 (API `perPage` cap). */
+const CATALOG_GRID_COLUMNS = { base: 1, sm: 2, md: 3, lg: 4, xl: 5, "2xl": 6 } as const;
+const ROWS_PER_CATALOG_PAGE = 8;
 
 export function CatalogPage() {
   const t = useTranslations("catalog");
   const locale = useLocale();
   const router = useRouter();
+  const openCart = useCartStore((s) => s.openCart);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [showBottomPager, setShowBottomPager] = useState(false);
   const [pagerExpanded, setPagerExpanded] = useState(false);
   const [activePage, setActivePage] = useState(1);
 
-  const { search, category, minPrice, maxPrice, inStock, setField } = useCatalogFilterStore();
+  const { search, category, minPrice, maxPrice, inStock } = useCatalogFilterStore();
 
   const columnCount =
     useBreakpointValue(CATALOG_GRID_COLUMNS, { fallback: "md" }) ?? CATALOG_GRID_COLUMNS.md;
@@ -77,27 +79,18 @@ export function CatalogPage() {
     return params;
   }, [category, inStock, maxPrice, minPrice, perPage, search]);
 
-  const productsQuery = useInfiniteQuery({
-    queryKey: ["catalog-products", baseQuery.toString()],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams(baseQuery.toString());
-      params.set("page", String(pageParam));
-      return getProducts(params);
-    },
-    getNextPageParam: (lastPage) =>
-      lastPage.pagination.page < lastPage.pagination.totalPages ? lastPage.pagination.page + 1 : undefined,
-  });
+  useSyncCatalogProducts(perPage);
 
-  const facetsQuery = useQuery({
-    queryKey: ["catalog-facets"],
-    queryFn: getFacets,
-  });
+  const pages = useProductsStore((s) => s.pages);
+  const productsStatus = useProductsStore((s) => s.status);
+  const productsError = useProductsStore((s) => s.error);
+  const isFetchingNextPage = useProductsStore((s) => s.isFetchingNextPage);
+  const fetchNextPage = useProductsStore((s) => s.fetchNextPage);
+  const hasNextPage = useProductsStore(selectHasNextPage);
 
-  const allProducts = useMemo(() => productsQuery.data?.pages.flatMap((entry) => entry.products) ?? [], [productsQuery.data]);
-  const totalCount = productsQuery.data?.pages[0]?.pagination.total ?? 0;
-  const totalPages = productsQuery.data?.pages[0]?.pagination.totalPages ?? 0;
-  const loadedMaxPage = productsQuery.data?.pages[productsQuery.data.pages.length - 1]?.pagination.page ?? 1;
+  const allProducts = useMemo(() => pages.flatMap((entry) => entry.products), [pages]);
+  const totalCount = pages[0]?.pagination.total ?? 0;
+  const totalPages = pages[0]?.pagination.totalPages ?? 0;
 
   function applyFilters() {
     const params = new URLSearchParams(baseQuery.toString());
@@ -107,11 +100,10 @@ export function CatalogPage() {
   }
 
   async function goToPage(nextPage: number) {
-    if (nextPage > loadedMaxPage && productsQuery.hasNextPage) {
-      for (let pageNumber = loadedMaxPage; pageNumber < nextPage; pageNumber += 1) {
-        // Load missing pages so manual page navigation stays connected.
-        await productsQuery.fetchNextPage();
-      }
+    let loadedMax = useProductsStore.getState().pages.at(-1)?.pagination.page ?? 1;
+    while (nextPage > loadedMax && selectHasNextPage(useProductsStore.getState())) {
+      await useProductsStore.getState().fetchNextPage();
+      loadedMax = useProductsStore.getState().pages.at(-1)?.pagination.page ?? 1;
     }
     setActivePage(nextPage);
     requestAnimationFrame(() => {
@@ -126,8 +118,8 @@ export function CatalogPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry?.isIntersecting && productsQuery.hasNextPage && !productsQuery.isFetchingNextPage) {
-          void productsQuery.fetchNextPage();
+        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
         }
       },
       { rootMargin: "200px 0px" },
@@ -135,7 +127,7 @@ export function CatalogPage() {
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [productsQuery.fetchNextPage, productsQuery.hasNextPage, productsQuery.isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -155,10 +147,10 @@ export function CatalogPage() {
   }, [totalPages]);
 
   useEffect(() => {
-    if (!productsQuery.data?.pages.length) return;
+    if (!pages.length) return;
 
     const updateActivePageFromScroll = () => {
-      const pageSections = productsQuery.data.pages
+      const pageSections = pages
         .map((entry) => ({ page: entry.pagination.page, el: document.getElementById(`catalog-page-${entry.pagination.page}`) }))
         .filter((entry): entry is { page: number; el: HTMLElement } => Boolean(entry.el));
       if (pageSections.length === 0) return;
@@ -170,7 +162,7 @@ export function CatalogPage() {
     updateActivePageFromScroll();
     window.addEventListener("scroll", updateActivePageFromScroll, { passive: true });
     return () => window.removeEventListener("scroll", updateActivePageFromScroll);
-  }, [productsQuery.data]);
+  }, [pages]);
 
   return (
     <Stack gap={{ base: 5, md: 8 }} minW={0} maxW="100%">
@@ -182,11 +174,11 @@ export function CatalogPage() {
         p={{ base: 4, md: 7 }}
       >
         <Stack gap={2}>
-          <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold" color="gray.800">
+          <Heading>
             G-Food
-          </Text>
+          </Heading>
           <Text fontSize={{ base: "sm", md: "md" }} color="gray.600">
-            GASHI International Food - les saveurs d&apos;ailleurs a prix accessibles.
+            {"GASHI International Food - les saveurs d'ailleurs a prix accessibles."}
           </Text>
         </Stack>
       </Box>
@@ -198,81 +190,40 @@ export function CatalogPage() {
         w="full"
         maxW="100%"
       >
-        <Stack
-          gap={4}
-          borderWidth="1px"
-          rounded="xl"
-          p={{ base: 3, md: 5 }}
-          minW={0}
-          h="fit-content"
-          bg="white"
-          position={{ base: "static", lg: "sticky" }}
-          top="100px"
-        >
-          <Text fontSize="xl" fontWeight="bold">
-            {t("title")}
-          </Text>
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => setField("search", e.target.value)}
-            bg="gray.50"
-          />
-          <select value={category} onChange={(e) => setField("category", e.target.value)}>
-            <option value="">{t("category")}</option>
-            {facetsQuery.data?.categories.map((option) => (
-              <option key={option.id} value={String(option.id)}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-          <HStack>
-            <Input
-              placeholder={t("minPrice")}
-              value={minPrice}
-              onChange={(e) => setField("minPrice", e.target.value)}
-              bg="gray.50"
-            />
-            <Input
-              placeholder={t("maxPrice")}
-              value={maxPrice}
-              onChange={(e) => setField("maxPrice", e.target.value)}
-              bg="gray.50"
-            />
-          </HStack>
-          <Checkbox.Root checked={inStock} onCheckedChange={(e) => setField("inStock", Boolean(e.checked))}>
-            <Checkbox.HiddenInput />
-            <Checkbox.Control />
-            <Checkbox.Label>{t("inStockOnly")}</Checkbox.Label>
-          </Checkbox.Root>
-          <Button onClick={() => applyFilters()}>{t("apply")}</Button>
-        </Stack>
+        <CatalogFilters onApply={applyFilters} />
 
         <Stack gap={6} minW={0} w="full">
-          {productsQuery.isPending ? (
+          {productsStatus === "loading" ? (
             <Flex justify="center" py={12}>
               <Spinner />
             </Flex>
+          ) : productsStatus === "error" ? (
+            <Text color="red.600">{productsError ?? t("noResults")}</Text>
           ) : (
             <>
               {allProducts.length > 0 ? (
                 <Stack gap={{ base: 3, md: 6 }}>
-                  {productsQuery.data?.pages.map((result) => (
+                  {pages.map((result) => (
                     <Box key={result.pagination.page} id={`catalog-page-${result.pagination.page}`} minW={0} w="full">
                       <SimpleGrid
                         columns={CATALOG_GRID_COLUMNS}
-                        gap={{ base: 3, md: 5 }}
+                        gap={{ base: 3, md: 4 }}
                         w="full"
                         minW={0}
                       >
                         {[...result.products].sort(compareProductsByStockThenTitle).map((product) => (
-                          <ProductCard key={`${result.pagination.page}-${product.id}`} product={product} locale={locale} />
+                          <ProductCard
+                            key={`${result.pagination.page}-${product.id}`}
+                            product={product}
+                            locale={locale}
+                            onOpenCart={openCart}
+                          />
                         ))}
                       </SimpleGrid>
                     </Box>
                   ))}
                   <Box ref={loadMoreRef} h="1px" />
-                  {productsQuery.isFetchingNextPage && (
+                  {isFetchingNextPage && (
                     <Flex justify="center" py={6}>
                       <Spinner />
                     </Flex>

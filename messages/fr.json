@@ -1,7 +1,7 @@
 {
   "nav": {
     "catalog": "Commander en ligne",
-    "checkout": "Paiement",
+    "delivery": "Livraison",
     "login": "Connexion",
     "cart": "Panier",
     "items": "articles",
@@ -11,28 +11,65 @@
     "cartLoading": "Chargement du panier...",
     "cartError": "Impossible de charger votre panier pour le moment.",
     "cartEmpty": "Votre panier est vide.",
-    "andMore": "+{count} de plus"
+    "cartEmptyDescription": "Parcourez le catalogue et ajoutez des articles à votre panier.",
+    "cartUnitPrice": "{price} l’unité",
+    "cartLineUnitTimesQty": "{unitPrice} × {quantity}",
+    "closeDrawer": "Fermer",
+    "andMore": "+{count} de plus",
+    "myAccount": "Mon compte",
+    "language": "Langue",
+    "localeFrench": "Français",
+    "localeEnglish": "English",
+    "localeGerman": "Deutsch",
+    "localeItalian": "Italiano"
   },
   "catalog": {
     "title": "Nos produits",
     "searchPlaceholder": "Rechercher un produit",
     "inStockOnly": "En stock uniquement",
-    "category": "Categorie",
+    "category": "Catégorie",
     "minPrice": "Prix min",
     "maxPrice": "Prix max",
     "apply": "Appliquer",
     "addToCart": "Ajouter",
     "removeFromCart": "Retirer du panier",
-    "noResults": "Aucun produit trouve"
+    "noResults": "Aucun produit trouvé",
+    "imageComingSoon": "Image à venir",
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock"
   },
   "checkout": {
     "title": "Finaliser votre commande",
     "submit": "Payer maintenant"
   },
+  "delivery": {
+    "title": "Livraison",
+    "intro": "Nous livrons en Suisse. Les délais et zones desservies peuvent varier ; les informations précises vous seront communiquées lors de la validation de votre commande.",
+    "freeFrom": "Les frais de port sont offerts pour toute commande d'un montant total d'au moins 100 CHF (TVA incluse).",
+    "note": "Texte indicatif — conditions définitives confirmées au moment du paiement.",
+    "close": "Fermer"
+  },
   "auth": {
+    "metaTitle": "Connexion | G-Food",
+    "metaDescription": "Connectez-vous à votre compte G-Food pour commander en ligne.",
     "title": "Connexion",
+    "subtitle": "Utilisez votre compte pour continuer vos achats.",
+    "wpHelp": "Vous utilisez le même compte WordPress que sur notre site principal (e-mail ou identifiant et mot de passe, ou un mot de passe d'application WordPress).",
+    "logoAlt": "G-Food",
+    "emailOrUsername": "E-mail ou identifiant",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "orDivider": "ou",
+    "invalidCredentials": "E-mail, identifiant ou mot de passe incorrect.",
+    "signInError": "La connexion a échoué. Veuillez réessayer.",
+    "forgotPassword": "Mot de passe oublié ?",
+    "createAccount": "Créer un compte",
+    "noAccount": "Pas encore de compte ?",
+    "backToShop": "Retour à la boutique",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "google": "Continuer avec Google",
-    "logout": "Se deconnecter"
+    "logout": "Se déconnecter"
   },
   "footer": {
     "impressum": "Impressum"

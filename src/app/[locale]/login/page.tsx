@@ -1,27 +1,43 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/server/auth-options";
+import { getWpAccountUrls } from "@/server/wp-auth";
+import { LoginView } from "./login-view";
 
-import { Button, Card, Stack, Text } from "@chakra-ui/react";
-import { useLocale, useTranslations } from "next-intl";
-import { signIn } from "next-auth/react";
+type PageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ callbackUrl?: string }>;
+};
 
-export default function LoginPage() {
-  const t = useTranslations("auth");
-  const locale = useLocale();
+function sanitizeCallbackUrl(raw: string | undefined, locale: string) {
+  const fallback = `/${locale}/commander-en-ligne`;
+  if (!raw || typeof raw !== "string") return fallback;
+  const u = raw.trim();
+  if (!u.startsWith("/") || u.startsWith("//") || !u.startsWith(`/${locale}/`)) return fallback;
+  return u;
+}
 
-  return (
-    <Card.Root maxW="md" mx="auto">
-      <Card.Header>
-        <Text fontSize="2xl" fontWeight="bold">
-          {t("title")}
-        </Text>
-      </Card.Header>
-      <Card.Body>
-        <Stack gap={3}>
-          <Button onClick={() => signIn("google", { callbackUrl: `/${locale}/commander-en-ligne` })}>
-            {t("google")}
-          </Button>
-        </Stack>
-      </Card.Body>
-    </Card.Root>
-  );
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auth" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
+
+export default async function LoginPage({ params, searchParams }: PageProps) {
+  const { locale } = await params;
+  const q = await searchParams;
+  const returnTo = sanitizeCallbackUrl(q.callbackUrl, locale);
+
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect(returnTo);
+  }
+
+  const { lostPassword, register } = getWpAccountUrls();
+
+  return <LoginView returnTo={returnTo} lostPasswordUrl={lostPassword} registerUrl={register} />;
 }

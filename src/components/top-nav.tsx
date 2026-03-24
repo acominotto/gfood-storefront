@@ -1,19 +1,20 @@
 "use client";
 
-import { NavCartPopover } from "@/components/nav-cart-popover";
-import { Link } from "@/i18n/navigation";
-import { Box, Button, Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
-import { signOut, useSession } from "next-auth/react";
-import { useLocale, useTranslations } from "next-intl";
+import { NavAccountMenu } from "@/components/nav-account-menu";
+import { NavCartButton } from "@/components/nav-cart-button";
+import { NavDeliveryDialog } from "@/components/nav-delivery-dialog";
+
+import { Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
+import { useTranslations } from "next-intl";
+import { Link } from "./ui/link";
 
 export function TopNav() {
   const t = useTranslations();
-  const { data: session } = useSession();
-  const locale = useLocale();
 
   return (
     <Flex
       as="header"
+
       justify="space-between"
       align={{ base: "flex-start", md: "center" }}
       direction={{ base: "column", md: "row" }}
@@ -22,7 +23,7 @@ export function TopNav() {
       px={{ base: 4, md: 8, lg: 10 }}
       borderBottomWidth="1px"
       borderColor="gray.200"
-      bg="white"
+      bg="brand.50"
       position="sticky"
       top={0}
       zIndex={1000}
@@ -31,10 +32,11 @@ export function TopNav() {
     >
       <HStack gap={3} align="center">
         <Image
-          src="https://g-food.ch/wp-content/uploads/2025/03/logo-11.png"
-          alt="G-Food logo"
+          src="/gashi-logo.png"
+          alt="G-Food.ch"
           h="40px"
           w="auto"
+          maxW="min(100%, 200px)"
         />
         <Stack gap={0}>
           <Text fontWeight="bold" color="gray.800" lineHeight="short">
@@ -53,22 +55,15 @@ export function TopNav() {
         gap={{ base: 3, sm: 5 }}
       >
         <HStack gap={{ base: 3, md: 4 }} wrap="wrap">
-          <Link href="/commander-en-ligne">{t("nav.catalog")}</Link>
-          <NavCartPopover />
-          <Link href="/checkout">{t("nav.checkout")}</Link>
-          <Link href="/login">{t("nav.login")}</Link>
-        </HStack>
-        <HStack gap={2}>
-          <Link href="/commander-en-ligne" locale={locale === "fr" ? "en" : "fr"}>
-            {locale === "fr" ? "EN" : "FR"}
+          <Link variant="underline" href="/commander-en-ligne">
+            {t("nav.catalog")}
           </Link>
-          {session ? (
-            <Button size="sm" variant="outline" onClick={() => signOut({ callbackUrl: `/${locale}/login` })}>
-              {t("auth.logout")}
-            </Button>
-          ) : (
-            <Box />
-          )}
+          <NavDeliveryDialog />
+          <Link variant="underline" href="/impressum">
+            {t("footer.impressum")}
+          </Link>
+          <NavCartButton />
+          <NavAccountMenu />
         </HStack>
       </Flex>
     </Flex>

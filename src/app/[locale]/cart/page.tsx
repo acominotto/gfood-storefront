@@ -1,34 +1,26 @@
 "use client";
 
-import { Box, Button, Card, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import { cartResponseSchema } from "@/server/schemas/cart";
+import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/features/cart/store/cart-store";
+import { Box, Card, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
 
 export default function CartPage() {
-  const queryClient = useQueryClient();
-  const cartQuery = useQuery({
-    queryKey: ["cart"],
-    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("woo/cart")).json()),
-  });
+  const cart = useCartStore((s) => s.cart);
+  const status = useCartStore((s) => s.status);
+  const ensureCartLoaded = useCartStore((s) => s.ensureCartLoaded);
+  const updateItemQuantity = useCartStore((s) => s.updateItemQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const mutatingProductId = useCartStore((s) => s.mutatingProductId);
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ key, quantity }: { key: string; quantity: number }) =>
-      apiClient.patch(`woo/cart/update-item?key=${encodeURIComponent(key)}`, { json: { quantity } }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  useEffect(() => {
+    void ensureCartLoaded();
+  }, [ensureCartLoaded]);
 
-  const deleteMutation = useMutation({
-    mutationFn: async (key: string) =>
-      apiClient.delete(`woo/cart/remove-item?key=${encodeURIComponent(key)}`),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  const pending = status === "loading" && !cart;
+  const busy = mutatingProductId !== null;
 
-  if (cartQuery.isPending) {
+  if (pending) {
     return <Spinner />;
   }
 
@@ -41,21 +33,31 @@ export default function CartPage() {
       </Card.Header>
       <Card.Body>
         <Stack gap={4}>
-          {cartQuery.data?.items?.map((item: { key: string; name: string; quantity: number }) => (
+          {cart?.items?.map((item) => (
             <Box key={item.key} borderWidth="1px" rounded="md" p={3}>
               <Text fontWeight="semibold">{item.name}</Text>
               <HStack mt={2}>
-                <Button size="sm" onClick={() => updateMutation.mutate({ key: item.key, quantity: item.quantity + 1 })}>
+                <Button
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => updateItemQuantity(item.key, item.quantity + 1, item.id)}
+                >
                   +
                 </Button>
                 <Text>{item.quantity}</Text>
                 <Button
                   size="sm"
-                  onClick={() => updateMutation.mutate({ key: item.key, quantity: Math.max(0, item.quantity - 1) })}
+                  disabled={busy}
+                  onClick={() => {
+                    if (item.quantity <= 1) {
+                      return removeItem(item.key, item.id);
+                    }
+                    return updateItemQuantity(item.key, item.quantity - 1, item.id);
+                  }}
                 >
                   -
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(item.key)}>
+                <Button size="sm" variant="outline" disabled={busy} onClick={() => removeItem(item.key, item.id)}>
                   Remove
                 </Button>
               </HStack>

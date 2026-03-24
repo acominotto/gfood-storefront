@@ -22,13 +22,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <AppProviders>
         <Flex direction="column" minH="100vh">
           <TopNav />
           <Box as="main" flex="1" display="flex" flexDirection="column" minW={0}>
             <Container
-              maxW="7xl"
+              maxW="min(100%, 120rem)"
               py={{ base: 5, md: 10 }}
               px={{ base: 3, sm: 4, md: 8 }}
               flex="1"

@@ -1,7 +1,7 @@
 {
   "nav": {
     "catalog": "Shop",
-    "checkout": "Checkout",
+    "delivery": "Delivery",
     "login": "Login",
     "cart": "Cart",
     "items": "items",
@@ -11,7 +11,17 @@
     "cartLoading": "Loading cart...",
     "cartError": "Unable to load your cart right now.",
     "cartEmpty": "Your cart is empty.",
-    "andMore": "+{count} more"
+    "cartEmptyDescription": "Browse the catalog and add items to your cart.",
+    "cartUnitPrice": "{price} each",
+    "cartLineUnitTimesQty": "{unitPrice} × {quantity}",
+    "closeDrawer": "Close",
+    "andMore": "+{count} more",
+    "myAccount": "My account",
+    "language": "Language",
+    "localeFrench": "Français",
+    "localeEnglish": "English",
+    "localeGerman": "Deutsch",
+    "localeItalian": "Italiano"
   },
   "catalog": {
     "title": "Products",
@@ -23,14 +33,41 @@
     "apply": "Apply",
     "addToCart": "Add",
     "removeFromCart": "Remove from cart",
-    "noResults": "No products found"
+    "noResults": "No products found",
+    "imageComingSoon": "Image coming soon",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock"
   },
   "checkout": {
     "title": "Checkout",
     "submit": "Place order"
   },
+  "delivery": {
+    "title": "Delivery",
+    "intro": "We deliver within Switzerland. Timeframes and service areas may vary; we will confirm details when you place your order.",
+    "freeFrom": "Delivery is free on orders of CHF 100 or more (incl. VAT).",
+    "note": "Summary information only — final terms are confirmed at checkout.",
+    "close": "Close"
+  },
   "auth": {
+    "metaTitle": "Sign in | G-Food",
+    "metaDescription": "Sign in with your G-Food account to shop online.",
     "title": "Sign in",
+    "subtitle": "Use your account to continue shopping.",
+    "wpHelp": "You sign in with the same WordPress account as on our main website (e-mail or username and password, or a WordPress application password).",
+    "logoAlt": "G-Food",
+    "emailOrUsername": "E-mail or username",
+    "password": "Password",
+    "signIn": "Sign in",
+    "orDivider": "or",
+    "invalidCredentials": "Invalid e-mail, username, or password.",
+    "signInError": "Sign-in failed. Please try again.",
+    "forgotPassword": "Forgot password?",
+    "createAccount": "Create an account",
+    "noAccount": "New here?",
+    "backToShop": "Back to shop",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "google": "Continue with Google",
     "logout": "Sign out"
   },

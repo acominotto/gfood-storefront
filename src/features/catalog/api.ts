@@ -1,7 +1,7 @@
 "use client";
 
 import { apiClient } from "@/lib/api-client";
-import { cartResponseSchema } from "@/server/schemas/cart";
+import { cartResponseSchema, checkoutSchema } from "@/server/schemas/cart";
 import { facetsResponseSchema, productListSchema } from "@/server/schemas/catalog";
 import { z } from "zod";
 
@@ -27,6 +27,11 @@ export async function getFacets() {
   return facetsResponseSchema.parse(await response.json());
 }
 
+export async function getCart() {
+  const response = await apiClient.get("woo/cart");
+  return cartResponseSchema.parse(await response.json());
+}
+
 export async function addToCart(productId: number) {
   const response = await apiClient.post("woo/cart/add-item", {
     json: {
@@ -49,4 +54,11 @@ export async function setCartItemQuantity(key: string, quantity: number) {
 export async function removeCartItem(key: string) {
   const response = await apiClient.delete(`woo/cart/remove-item?key=${encodeURIComponent(key)}`);
   return cartResponseSchema.parse(await response.json());
+}
+
+export type CheckoutPayload = z.infer<typeof checkoutSchema>;
+
+export async function postCheckout(body: CheckoutPayload) {
+  const response = await apiClient.post("woo/checkout", { json: body });
+  return response.json() as Promise<unknown>;
 }

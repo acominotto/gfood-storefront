@@ -1,11 +1,11 @@
 "use client";
 
-import { Box, Button, Card, Grid, Input, Stack, Text, Textarea } from "@chakra-ui/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/features/cart/store/cart-store";
+import type { CheckoutPayload } from "@/features/catalog/api";
+import { Box, Card, Grid, Input, Stack, Text, Textarea } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { apiClient } from "@/lib/api-client";
-import { cartResponseSchema } from "@/server/schemas/cart";
+import { useEffect, useState } from "react";
 
 type FormState = {
   first_name: string;
@@ -34,30 +34,38 @@ const defaults: FormState = {
 export function CheckoutPage() {
   const t = useTranslations("checkout");
   const [form, setForm] = useState<FormState>(defaults);
+  const cart = useCartStore((s) => s.cart);
+  const ensureCartLoaded = useCartStore((s) => s.ensureCartLoaded);
+  const submitCheckout = useCartStore((s) => s.submitCheckout);
+  const checkoutError = useCartStore((s) => s.checkoutError);
 
-  const cartQuery = useQuery({
-    queryKey: ["cart"],
-    queryFn: async () => cartResponseSchema.parse(await (await apiClient.get("woo/cart")).json()),
-  });
+  useEffect(() => {
+    void ensureCartLoaded();
+  }, [ensureCartLoaded]);
 
-  const checkoutMutation = useMutation({
-    mutationFn: async () =>
-      apiClient.post("woo/checkout", {
-        json: {
-          billing_address: {
-            first_name: form.first_name,
-            last_name: form.last_name,
-            address_1: form.address_1,
-            city: form.city,
-            postcode: form.postcode,
-            country: form.country,
-            email: form.email,
-            phone: form.phone,
-          },
-          customer_note: form.note,
-        },
-      }),
-  });
+  async function onSubmit() {
+    const payload: CheckoutPayload = {
+      billing_address: {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        company: "",
+        address_1: form.address_1,
+        address_2: "",
+        city: form.city,
+        state: "",
+        postcode: form.postcode,
+        country: form.country,
+        email: form.email,
+        phone: form.phone,
+      },
+      customer_note: form.note,
+    };
+    try {
+      await submitCheckout(payload);
+    } catch {
+      /* checkoutError set in store */
+    }
+  }
 
   return (
     <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8}>
@@ -120,9 +128,12 @@ export function CheckoutPage() {
               value={form.note}
               onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
             />
-            <Button loading={checkoutMutation.isPending} onClick={() => checkoutMutation.mutate()}>
-              {t("submit")}
-            </Button>
+            {checkoutError ? (
+              <Text fontSize="sm" color="red.600">
+                {checkoutError}
+              </Text>
+            ) : null}
+            <Button onClick={() => onSubmit()}>{t("submit")}</Button>
           </Stack>
         </Card.Body>
       </Card.Root>
@@ -131,7 +142,7 @@ export function CheckoutPage() {
           <Text fontWeight="semibold">Cart</Text>
         </Card.Header>
         <Card.Body>
-          {cartQuery.data?.items?.map((item: { key: string; name: string; quantity: number }) => (
+          {cart?.items?.map((item) => (
             <Box key={item.key} py={2}>
               <Text>{item.name}</Text>
               <Text fontSize="sm" color="fg.muted">

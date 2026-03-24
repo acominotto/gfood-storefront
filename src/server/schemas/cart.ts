@@ -18,6 +18,8 @@ export const cartItemSchema = z.object({
   prices: z
     .object({
       currency_code: nullableString,
+      /** Unit price in minor units (WooCommerce Store API). */
+      price: nullableString,
       line_total: nullableString,
       line_subtotal: nullableString,
     })

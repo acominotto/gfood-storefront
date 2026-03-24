@@ -17,10 +17,14 @@ const HOP_BY_HOP = new Set([
   "set-cookie",
 ]);
 
+/** Node fetch decompresses gzip/deflate bodies but may still advertise Content-Encoding (and a compressed Content-Length). Forwarding those with the decoded stream breaks the browser (ERR_CONTENT_DECODING_FAILED). */
+const STRIP_AFTER_FETCH_DECODE = new Set(["content-encoding", "content-length"]);
+
 function filteredResponseHeaders(upstream: Headers) {
   const out = new Headers();
   upstream.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) {
+    const lower = key.toLowerCase();
+    if (!HOP_BY_HOP.has(lower) && !STRIP_AFTER_FETCH_DECODE.has(lower)) {
       out.set(key, value);
     }
   });
