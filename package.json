@@ -15,6 +15,7 @@
     "@emotion/react": "^11.14.0",
     "@imgly/background-removal-node": "^1.4.5",
     "framer-motion": "^12.38.0",
+    "html-entities": "^2.6.0",
     "ky": "^1.14.3",
     "next": "16.2.0",
     "next-auth": "^4.24.13",

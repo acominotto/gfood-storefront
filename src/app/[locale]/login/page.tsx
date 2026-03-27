@@ -11,7 +11,7 @@ type PageProps = {
 };
 
 function sanitizeCallbackUrl(raw: string | undefined, locale: string) {
-  const fallback = `/${locale}/commander-en-ligne`;
+  const fallback = `/${locale}`;
   if (!raw || typeof raw !== "string") return fallback;
   const u = raw.trim();
   if (!u.startsWith("/") || u.startsWith("//") || !u.startsWith(`/${locale}/`)) return fallback;

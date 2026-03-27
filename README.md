@@ -28,7 +28,7 @@ npm run dev
 
 ## Routes
 
-- `/:locale/commander-en-ligne` product listing with facets + pagination
+- `/:locale` product listing (home) with facets + pagination
 - `/:locale/cart` headless cart
 - `/:locale/checkout` headless checkout
 - `/:locale/login` Google sign in

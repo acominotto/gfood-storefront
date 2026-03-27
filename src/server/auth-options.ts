@@ -1,9 +1,9 @@
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthOptions } from "next-auth";
 import { env } from "@/lib/env";
 import { authenticateWpUserWithPassword } from "@/server/wp-auth";
 import { findOrCreateWpUser } from "@/server/wp-client";
+import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 function slugifyUsername(value: string) {
   return value

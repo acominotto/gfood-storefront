@@ -30,22 +30,24 @@ export function TopNav() {
       shadow="sm"
       backdropFilter="saturate(180%) blur(2px)"
     >
-      <HStack gap={3} align="center">
-        <Image
-          src="/gashi-logo.png"
-          alt="G-Food.ch"
-          h="40px"
-          w="auto"
-          maxW="min(100%, 200px)"
-        />
-        <Stack gap={0}>
-          <Text fontWeight="bold" color="gray.800" lineHeight="short">
-            GASHI International Food
-          </Text>
-          <Text fontSize="sm" color="gray.500" lineHeight="shorter">
-            Les saveurs d&apos;ailleurs
-          </Text>
-        </Stack>
+      <HStack gap={3} align="center" asChild>
+        <Link href="/" display="flex" alignItems="center" gap={3} _hover={{ textDecoration: "none" }}>
+          <Image
+            src="/gashi-logo.png"
+            alt="G-Food.ch"
+            h="40px"
+            w="auto"
+            maxW="min(100%, 200px)"
+          />
+          <Stack gap={0}>
+            <Text fontWeight="bold" color="gray.800" lineHeight="short">
+              GASHI International Food
+            </Text>
+            <Text fontSize="sm" color="gray.500" lineHeight="shorter">
+              Les saveurs d&apos;ailleurs
+            </Text>
+          </Stack>
+        </Link>
       </HStack>
       <Flex
         direction={{ base: "column", sm: "row" }}
@@ -55,9 +57,6 @@ export function TopNav() {
         gap={{ base: 3, sm: 5 }}
       >
         <HStack gap={{ base: 3, md: 4 }} wrap="wrap">
-          <Link variant="underline" href="/commander-en-ligne">
-            {t("nav.catalog")}
-          </Link>
           <NavDeliveryDialog />
           <Link variant="underline" href="/impressum">
             {t("footer.impressum")}

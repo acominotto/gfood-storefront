@@ -5,6 +5,7 @@ import { CatalogFilters } from "@/features/catalog/components/filters";
 import { ProductCard } from "@/features/catalog/components/product-card";
 import { useCatalogFilterStore } from "@/features/catalog/store/catalog-filters";
 import { selectHasNextPage, useProductsStore } from "@/features/catalog/store/products-store";
+import { useSyncCatalogFiltersFromSearchParams } from "@/features/catalog/hooks/use-sync-catalog-filters-from-url";
 import { useSyncCatalogProducts } from "@/features/catalog/store/use-sync-catalog-products";
 import type { Product } from "@/server/schemas/catalog";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export function CatalogPage() {
   const t = useTranslations("catalog");
   const locale = useLocale();
   const router = useRouter();
+  useSyncCatalogFiltersFromSearchParams();
   const openCart = useCartStore((s) => s.openCart);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [showBottomPager, setShowBottomPager] = useState(false);

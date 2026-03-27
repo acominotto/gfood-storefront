@@ -36,7 +36,9 @@
     "noResults": "Keine Produkte gefunden",
     "imageComingSoon": "Bild folgt in Kürze",
     "inStock": "Auf Lager",
-    "outOfStock": "Nicht verfügbar"
+    "outOfStock": "Nicht verfügbar",
+    "backToCatalog": "Zurück zum Katalog",
+    "breadcrumbHome": "Start"
   },
   "checkout": {
     "title": "Kasse",

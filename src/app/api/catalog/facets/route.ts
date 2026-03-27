@@ -1,17 +1,16 @@
 import { createWooClient } from "@/server/woo-client";
 import { jsonError, jsonOk } from "@/server/api-response";
-import { categoryListSchema, facetsResponseSchema, productListSchema } from "@/server/schemas/catalog";
+import { facetsResponseSchema, productListSchema } from "@/server/schemas/catalog";
+import { getAllProductCategories } from "@/server/woo-taxonomies";
 
 export async function GET() {
   try {
     const woo = createWooClient();
 
-    const [categoriesResp, productsResp] = await Promise.all([
-      woo.get("products/categories?per_page=100"),
+    const [categories, productsResp] = await Promise.all([
+      getAllProductCategories(),
       woo.get("products?per_page=100"),
     ]);
-
-    const categories = categoryListSchema.parse(await categoriesResp.json());
     const products = productListSchema.parse(await productsResp.json());
 
     const values = products

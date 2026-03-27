@@ -1,18 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  ComboboxContent,
+  ComboboxControl,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxItemGroup,
+  ComboboxItemText,
+  ComboboxLabel,
+  ComboboxRoot,
+} from "@/components/ui/combobox";
+import { buildCategoryFilterComboboxData, type CategorySelectItem } from "@/lib/category-tree";
 import { useCatalogFilterStore } from "@/features/catalog/store/catalog-filters";
 import { useProductsStore } from "@/features/catalog/store/products-store";
-import {
-  Checkbox,
-  Heading,
-  HStack,
-  Input,
-  Portal,
-  Select,
-  Stack,
-  createListCollection,
-} from "@chakra-ui/react";
+import { Box, Checkbox, Heading, HStack, Input, Stack, createListCollection } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 
@@ -22,7 +25,16 @@ type CatalogFiltersProps = {
 
 export function CatalogFilters({ onApply }: CatalogFiltersProps) {
   const t = useTranslations("catalog");
-  const { search, category, minPrice, maxPrice, inStock, setField } = useCatalogFilterStore();
+  const {
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    inStock,
+    categoryComboboxFilter,
+    setField,
+    setCategoryComboboxFilter,
+  } = useCatalogFilterStore();
   const facets = useProductsStore((s) => s.facets);
   const fetchFacets = useProductsStore((s) => s.fetchFacets);
 
@@ -30,15 +42,49 @@ export function CatalogFilters({ onApply }: CatalogFiltersProps) {
     void fetchFacets();
   }, [fetchFacets]);
 
-  const categoryCollection = useMemo(() => {
+  const { collection, displayGroups, allOption, showAllOption } = useMemo(() => {
     const categories = facets?.categories ?? [];
-    return createListCollection({
-      items: [
-        { label: t("category"), value: "" },
-        ...categories.map((c) => ({ label: c.name, value: String(c.id) })),
-      ],
-    });
-  }, [facets, t]);
+    const built = buildCategoryFilterComboboxData(categories, t("category"));
+    const q = categoryComboboxFilter.trim().toLowerCase();
+
+    const itemVisible = (item: CategorySelectItem) => {
+      if (!q) return true;
+      if (category && item.value === category) return true;
+      return item.label.trim().toLowerCase().includes(q);
+    };
+
+    const groupHeadingMatches = (heading: string) => heading.trim().toLowerCase().includes(q);
+
+    const showAll = !q || built.allOption.label.toLowerCase().includes(q);
+
+    if (!q) {
+      return {
+        collection: createListCollection({ items: built.flatItems }),
+        displayGroups: built.groups,
+        allOption: built.allOption,
+        showAllOption: true,
+      };
+    }
+
+    const displayGroups = built.groups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter((item) => itemVisible(item) || groupHeadingMatches(g.heading)),
+      }))
+      .filter((g) => g.items.length > 0);
+
+    const collectionItems: CategorySelectItem[] = [
+      ...(showAll ? [built.allOption] : []),
+      ...displayGroups.flatMap((g) => g.items),
+    ];
+
+    return {
+      collection: createListCollection({ items: collectionItems }),
+      displayGroups,
+      allOption: built.allOption,
+      showAllOption: showAll,
+    };
+  }, [facets, t, categoryComboboxFilter, category]);
 
   return (
     <Stack
@@ -61,35 +107,44 @@ export function CatalogFilters({ onApply }: CatalogFiltersProps) {
         onChange={(e) => setField("search", e.target.value)}
         bg="gray.50"
       />
-      <Select.Root
-        collection={categoryCollection}
-        size="sm"
-        width="full"
-        value={[category]}
-        onValueChange={(e) => setField("category", e.value[0] ?? "")}
-      >
-        <Select.HiddenSelect />
-        <Select.Control>
-          <Select.Trigger bg="gray.50">
-            <Select.ValueText placeholder={t("category")} />
-          </Select.Trigger>
-          <Select.IndicatorGroup>
-            <Select.Indicator />
-          </Select.IndicatorGroup>
-        </Select.Control>
-        <Portal>
-          <Select.Positioner>
-            <Select.Content>
-              {categoryCollection.items.map((item) => (
-                <Select.Item item={item} key={item.value === "" ? "__all__" : item.value}>
-                  {item.label}
-                  <Select.ItemIndicator />
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Positioner>
-        </Portal>
-      </Select.Root>
+
+      <Box minW={0}>
+        <ComboboxRoot
+          collection={collection}
+          size="sm"
+          width="full"
+          value={category === "" ? [] : [category]}
+          onValueChange={(e) => setField("category", e.value[0] ?? "")}
+          onInputValueChange={(e) => setCategoryComboboxFilter(e.inputValue)}
+          selectionBehavior="replace"
+          allowCustomValue={false}
+        >
+          <ComboboxLabel srOnly>{t("category")}</ComboboxLabel>
+          <ComboboxControl clearable>
+            <ComboboxInput placeholder={t("category")} bg="gray.50" />
+          </ComboboxControl>
+          <ComboboxContent maxH="min(60vh, 320px)" overflowY="auto">
+            <ComboboxEmpty py={2} px={3}>
+              {t("noResults")}
+            </ComboboxEmpty>
+            {showAllOption ? (
+              <ComboboxItem item={allOption} key="__all__">
+                <ComboboxItemText>{allOption.label}</ComboboxItemText>
+              </ComboboxItem>
+            ) : null}
+            {displayGroups.map((group) => (
+              <ComboboxItemGroup key={group.heading} label={group.heading}>
+                {group.items.map((item) => (
+                  <ComboboxItem key={item.value} item={item}>
+                    <ComboboxItemText>{item.label}</ComboboxItemText>
+                  </ComboboxItem>
+                ))}
+              </ComboboxItemGroup>
+            ))}
+          </ComboboxContent>
+        </ComboboxRoot>
+      </Box>
+
       <HStack>
         <Input
           placeholder={t("minPrice")}

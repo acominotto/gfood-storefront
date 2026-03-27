@@ -36,7 +36,9 @@
     "noResults": "No products found",
     "imageComingSoon": "Image coming soon",
     "inStock": "In stock",
-    "outOfStock": "Out of stock"
+    "outOfStock": "Out of stock",
+    "backToCatalog": "Back to catalogue",
+    "breadcrumbHome": "Home"
   },
   "checkout": {
     "title": "Checkout",

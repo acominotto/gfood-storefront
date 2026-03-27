@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { decodeHtmlEntities } from "@/lib/html-plain";
+
+const wooText = z.string().transform((s) => decodeHtmlEntities(s));
+const wooTextOptional = z
+  .string()
+  .optional()
+  .transform((s) => (s !== undefined ? decodeHtmlEntities(s) : s));
 
 export const productsQuerySchema = z.object({
   search: z.string().optional(),
@@ -18,16 +25,16 @@ export const imageSchema = z.object({
   thumbnail: z.string().url().optional(),
   srcset: z.string().optional(),
   sizes: z.string().optional(),
-  name: z.string().optional(),
-  alt: z.string().optional(),
+  name: wooTextOptional,
+  alt: wooTextOptional,
 });
 
 export const productSchema = z.object({
   id: z.number(),
-  name: z.string(),
+  name: wooText,
   slug: z.string(),
   permalink: z.string().optional(),
-  short_description: z.string().optional(),
+  short_description: wooTextOptional,
   prices: z
     .object({
       currency_code: z.string(),
@@ -42,16 +49,24 @@ export const productSchema = z.object({
   is_in_stock: z.boolean().optional(),
   is_purchasable: z.boolean().optional().default(true),
   images: z.array(imageSchema).default([]),
-  categories: z.array(z.object({ id: z.number(), name: z.string(), slug: z.string() })).default([]),
+  categories: z
+    .array(z.object({ id: z.number(), name: wooText, slug: z.string() }))
+    .default([]),
 });
 
 export const productListSchema = z.array(productSchema);
 
 export const categorySchema = z.object({
   id: z.number(),
-  name: z.string(),
+  name: wooText,
   slug: z.string(),
   count: z.number().optional(),
+  /** WooCommerce parent term id; 0 = top-level */
+  parent: z.preprocess((v: unknown) => {
+    if (v === null || v === undefined) return 0;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }, z.number()),
 });
 
 export const categoryListSchema = z.array(categorySchema);
@@ -66,3 +81,4 @@ export const facetsResponseSchema = z.object({
 
 export type ProductsQuery = z.infer<typeof productsQuerySchema>;
 export type Product = z.infer<typeof productSchema>;
+export type Category = z.infer<typeof categorySchema>;

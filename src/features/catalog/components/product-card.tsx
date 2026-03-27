@@ -1,9 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { CartQuantityRow } from "@/components/cart-quantity-row";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
+import { productPath } from "@/lib/product-url";
 import type { Product } from "@/server/schemas/catalog";
 import { Badge, Box, Card, HStack, Image, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
@@ -80,6 +82,7 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
       borderWidth="1px"
       borderColor="gray.200"
       rounded="xl"
+      cursor="pointer"
       bg="white"
       overflow="hidden"
       minW={0}
@@ -87,20 +90,26 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
       display="flex"
       flexDirection="column"
       transition="all 0.2s ease"
-      cursor={onOpenCart ? "pointer" : undefined}
       onClick={onOpenCart ? () => onOpenCart() : undefined}
       _hover={{ transform: "translateY(-2px)", shadow: "md" }}
     >
       <Card.Header p={0}>
-        <Box bg="gray.100" w="full" aspectRatio={1} display="flex" alignItems="center" justifyContent="center">
-          {proxySrc ? (
-            <Image src={proxySrc} alt={product.name} w="full" h="full" objectFit="contain" />
-          ) : (
-            <Box role="img" aria-label={product.name} w="full" h="full" display="flex" alignItems="center" justifyContent="center">
-              <ProductImagePlaceholder />
-            </Box>
-          )}
-        </Box>
+        <Link
+          href={productPath(product)}
+          display="block"
+          onClick={(e) => e.stopPropagation()}
+          _hover={{ textDecoration: "none" }}
+        >
+          <Box bg="gray.100" w="full" aspectRatio={1} display="flex" alignItems="center" justifyContent="center">
+            {proxySrc ? (
+              <Image src={proxySrc} alt={product.name} w="full" h="full" objectFit="contain" />
+            ) : (
+              <Box role="img" aria-label={product.name} w="full" h="full" display="flex" alignItems="center" justifyContent="center">
+                <ProductImagePlaceholder />
+              </Box>
+            )}
+          </Box>
+        </Link>
       </Card.Header>
       <Card.Body
         p={3}
@@ -114,9 +123,17 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
         flexDirection="column"
       >
         <Stack gap={2} flex="1" minH={0}>
-          <Text fontWeight="semibold" lineClamp={2}>
+          <Link
+            href={productPath(product)}
+            variant="plain"
+            color="inherit"
+            fontWeight="semibold"
+            lineClamp={2}
+            onClick={(e) => e.stopPropagation()}
+            _hover={{ textDecoration: "underline" }}
+          >
             {product.name}
-          </Text>
+          </Link>
           {translation ? (
             <Text fontSize="sm" color="gray.600" lineClamp={2}>
               {translation}

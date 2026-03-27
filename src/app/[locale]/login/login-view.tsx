@@ -211,7 +211,7 @@ export function LoginView({ returnTo, lostPasswordUrl, registerUrl }: Props) {
                   {t("createAccount")}
                 </ChakraLink>
               </Text>
-              <NextIntlLink href="/commander-en-ligne">
+              <NextIntlLink href="/">
                 <Text as="span" fontSize="sm" color="fg.muted" textDecoration="underline">
                   {t("backToShop")}
                 </Text>
