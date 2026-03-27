@@ -12,10 +12,10 @@ import {
   ComboboxLabel,
   ComboboxRoot,
 } from "@/components/ui/combobox";
-import { buildCategoryFilterComboboxData, type CategorySelectItem } from "@/lib/category-tree";
 import { useCatalogFilterStore } from "@/features/catalog/store/catalog-filters";
 import { useProductsStore } from "@/features/catalog/store/products-store";
-import { Box, Checkbox, Heading, HStack, Input, Stack, createListCollection } from "@chakra-ui/react";
+import { buildCategoryFilterComboboxData, type CategorySelectItem } from "@/lib/category-tree";
+import { Box, Checkbox, createListCollection, Heading, HStack, Input, Stack } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 
@@ -164,7 +164,7 @@ export function CatalogFilters({ onApply }: CatalogFiltersProps) {
         <Checkbox.Control />
         <Checkbox.Label>{t("inStockOnly")}</Checkbox.Label>
       </Checkbox.Root>
-      <Button onClick={onApply}>{t("apply")}</Button>
+      <Button onClick={onApply} colorPalette="brand" rounded="full">{t("apply")}</Button>
     </Stack>
   );
 }
