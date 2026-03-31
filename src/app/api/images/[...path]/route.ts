@@ -13,7 +13,7 @@ type CachedImage = {
 };
 
 const imageCache = new Map<string, CachedImage>();
-const IMAGE_PIPELINE_VERSION = "5";
+const IMAGE_PIPELINE_VERSION = "6";
 
 function bytesToArrayBuffer(bytes: Uint8Array) {
   const start = bytes.byteOffset;
@@ -247,7 +247,7 @@ export async function GET(request: Request, { params }: Params) {
       // The background-removal library relies on Blob MIME type detection.
       // Passing a raw Buffer causes format detection to fail and returns the original image.
       const result = await removeBackground(new Blob([buffer], { type: upstreamContentType }), {
-        model: "medium",
+        model: "small",
         output: {
           format: "image/png",
           quality: 0.9,

@@ -1,7 +1,6 @@
 /**
- * Chunk files for `@imgly/background-removal-node` model `medium` only (see route `model: "medium"`).
- * Keeps Vercel under the serverless unzipped limit; do not trace the whole imgly `dist` tree in Next config.
- * After upgrading `@imgly/background-removal-node`, refresh from `dist/resources.json` key `/models/medium`.
+ * `/models/medium` chunk hashes — excluded from the `/api/images` trace (route uses `small` for Vercel size).
+ * Refresh from `dist/resources.json` after upgrading `@imgly/background-removal-node`.
  */
 export const imglyBackgroundRemovalMediumChunkNames = [
   "fe1b9f06af9d2147016884f4eb683d4dc540244a7453c3b742ae527725df2eec",

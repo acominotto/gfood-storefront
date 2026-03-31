@@ -5,19 +5,37 @@ import { imglyBackgroundRemovalSmallChunkNames } from "./src/lib/imgly-small-mod
 
 const imglyDist = "./node_modules/@imgly/background-removal-node/dist";
 
+/** Vercel Node is Linux x64 (glibc). Drop other sharp optional prebuilds from this function's trace. */
+const sharpTraceExcludesNonLinuxX64 = [
+  "./node_modules/@img/sharp-linux-arm/**/*",
+  "./node_modules/@img/sharp-linux-arm64/**/*",
+  "./node_modules/@img/sharp-linux-ppc64/**/*",
+  "./node_modules/@img/sharp-linux-riscv64/**/*",
+  "./node_modules/@img/sharp-linux-s390x/**/*",
+  "./node_modules/@img/sharp-linuxmusl-arm64/**/*",
+  "./node_modules/@img/sharp-linuxmusl-x64/**/*",
+  "./node_modules/@img/sharp-libvips-linux-arm/**/*",
+  "./node_modules/@img/sharp-libvips-linux-arm64/**/*",
+  "./node_modules/@img/sharp-libvips-linux-ppc64/**/*",
+  "./node_modules/@img/sharp-libvips-linux-riscv64/**/*",
+  "./node_modules/@img/sharp-libvips-linux-s390x/**/*",
+  "./node_modules/@img/sharp-libvips-linuxmusl-arm64/**/*",
+  "./node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
+] as const;
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   // Keep native addons out of the Turbopack bundle so `onnxruntime-node` loads
   // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
   // otherwise traced only the `.node` file and failed at runtime).
   serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
-  // Linux x64 ORT + medium model chunks only. Use pnpm `node-linker=hoisted` (.npmrc) so the
-  // tracer does not duplicate every file under both .pnpm/* and symlinks (~245MB → ~106MB).
+  // Linux x64 ORT + small model chunks only (below 250 MB unzipped on Vercel). Requires pnpm
+  // `node-linker=hoisted` in .npmrc so paths are not duplicated under .pnpm/*.
   outputFileTracingIncludes: {
     "/app/api/images/**/*": [
       "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
       `${imglyDist}/resources.json`,
-      ...imglyBackgroundRemovalMediumChunkNames.map((name) => `${imglyDist}/${name}`),
+      ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },
   outputFileTracingExcludes: {
@@ -32,9 +50,9 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-wasm32/**/*",
       "./node_modules/@img/sharp-win32-*/**/*",
       "./node_modules/@img/sharp-libvips-win32-*/**/*",
-      // Runtime does not need C headers bundled with sharp's prebuild vendor trees.
+      ...sharpTraceExcludesNonLinuxX64,
       "./node_modules/sharp/vendor/**/include/**/*",
-      ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
+      ...imglyBackgroundRemovalMediumChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },
   images: {

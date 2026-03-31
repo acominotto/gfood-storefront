@@ -1,6 +1,6 @@
 /**
- * Chunk files for `@imgly/background-removal-node` `/models/small` only.
- * Excluded from the `/api/images` serverless trace so only `medium` ships (see image route).
+ * Chunk files for `@imgly/background-removal-node` `/models/small` (see image route `model: "small"`).
+ * Listed in `next.config` `outputFileTracingIncludes` so the full `dist/` tree is not bundled.
  */
 export const imglyBackgroundRemovalSmallChunkNames = [
   "b34a3e9350ad77140964b6a2e1e32cd9738acd9d01e5899b96be71901a22ef47",
