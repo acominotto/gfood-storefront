@@ -28,6 +28,7 @@ function imageProxyUrl(src: string, opts: { thumb?: boolean }) {
     q: opts.thumb ? "72" : "82",
     fit: opts.thumb ? "cover" : "contain",
     bg: "remove",
+    format: "webp",
   });
   if (opts.thumb) {
     params.set("preset", "thumb");

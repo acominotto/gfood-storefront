@@ -42,7 +42,7 @@ export function cartItemImageProxy(item: CartLineItem): string | null {
     return null;
   }
   const path = new URL(src, "https://g-food.ch").pathname.replace(/^\//, "");
-  return `/api/images/${path}?preset=thumb&q=72&fit=cover&bg=remove`;
+  return `/api/images/${path}?preset=thumb&q=72&fit=cover&bg=remove&format=webp`;
 }
 
 /** Minor-unit string for one unit, from API `prices.price` or derived from line totals. */

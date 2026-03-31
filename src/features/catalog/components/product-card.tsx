@@ -47,7 +47,7 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
   const image = product.images[0];
   const src = image?.thumbnail ?? image?.src;
   const proxySrc = src
-    ? `/api/images/${new URL(src, "https://g-food.ch").pathname.replace(/^\//, "")}?preset=thumb&q=72&fit=cover&bg=remove`
+    ? `/api/images/${new URL(src, "https://g-food.ch").pathname.replace(/^\//, "")}?preset=thumb&q=72&fit=cover&bg=remove&format=webp`
     : null;
   const translation = toPlainText(product.short_description);
   const canAddToCart = Boolean(product.is_in_stock) && product.is_purchasable;

@@ -31,7 +31,7 @@ function ogImageUrl(product: Product): string | undefined {
     return undefined;
   }
   const path = new URL(src, "https://g-food.ch").pathname.replace(/^\//, "");
-  return `${baseUrl()}/api/images/${path}?q=82&fit=contain&bg=remove`;
+  return `${baseUrl()}/api/images/${path}?q=82&fit=contain&bg=remove&format=webp`;
 }
 
 function buildProductJsonLd(locale: string, product: Product): Record<string, unknown> {

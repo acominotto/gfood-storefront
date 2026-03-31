@@ -188,7 +188,10 @@ export async function GET(request: Request, { params }: Params) {
   const quality = Number(url.searchParams.get("q") ?? env.IMAGE_PROXY_QUALITY_DEFAULT);
   const fit = url.searchParams.get("fit") === "contain" ? "contain" : "cover";
   const removeBg = url.searchParams.get("bg") === "remove";
-  const format = chooseFormat(request, url.searchParams.get("format"));
+  let format = chooseFormat(request, url.searchParams.get("format"));
+  if (removeBg && (format === "jpeg" || format === "jpg")) {
+    format = "webp";
+  }
 
   const { path } = await params;
   const pathname = path.join("/");
@@ -253,22 +256,25 @@ export async function GET(request: Request, { params }: Params) {
       sourceBuffer = Buffer.from(await result.arrayBuffer());
       sourceBuffer = await clampLowAlphaToTransparent(sourceBuffer);
       sourceBuffer = await removeDarkBorderBackground(sourceBuffer);
-    } catch {
-      // Keep the original image if background removal fails.
+    } catch (err) {
+      // Native onnxruntime-node can fail on Linux serverless while working locally; unlogged, that looked like “wrong images” on Vercel.
+      console.error("[image-proxy] background removal failed", {
+        pathname,
+        error: err instanceof Error ? err.message : String(err),
+      });
       sourceBuffer = buffer;
     }
   }
   let transformed: Buffer;
   let contentType = "image/webp";
-  const targetFormat = removeBg && (format === "jpeg" || format === "jpg") ? "webp" : format;
 
-  if (targetFormat === "avif") {
+  if (format === "avif") {
     transformed = await sharp(sourceBuffer)
       .resize({ width, height, fit, position: "centre", withoutEnlargement: true })
       .avif({ quality })
       .toBuffer();
     contentType = "image/avif";
-  } else if (targetFormat === "jpeg" || targetFormat === "jpg") {
+  } else if (format === "jpeg" || format === "jpg") {
     transformed = await sharp(sourceBuffer)
       .resize({ width, height, fit, position: "centre", withoutEnlargement: true })
       .jpeg({ quality })
