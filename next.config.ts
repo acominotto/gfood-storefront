@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
   // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
   // otherwise traced only the `.node` file and failed at runtime).
   serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
-  // Linux x64 only for ORT; include medium model chunks only (not full `dist/`).
+  // Linux x64 ORT + medium model chunks only. Use pnpm `node-linker=hoisted` (.npmrc) so the
+  // tracer does not duplicate every file under both .pnpm/* and symlinks (~245MB → ~106MB).
   outputFileTracingIncludes: {
     "/app/api/images/**/*": [
       "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
@@ -33,7 +34,6 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-libvips-win32-*/**/*",
       // Runtime does not need C headers bundled with sharp's prebuild vendor trees.
       "./node_modules/sharp/vendor/**/include/**/*",
-      "./node_modules/@imgly/background-removal-node/node_modules/sharp/vendor/**/include/**/*",
       ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },
