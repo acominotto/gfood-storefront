@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { imglyBackgroundRemovalMediumChunkNames } from "./src/lib/imgly-medium-model-assets";
+import { imglyBackgroundRemovalSmallChunkNames } from "./src/lib/imgly-small-model-assets";
+
+const imglyDist = "./node_modules/@imgly/background-removal-node/dist";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -7,11 +11,12 @@ const nextConfig: NextConfig = {
   // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
   // otherwise traced only the `.node` file and failed at runtime).
   serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
-  // Only Linux x64 (Vercel's default Node runtime). `bin/**/*` adds ~130MB of other OS/arch.
+  // Linux x64 only for ORT; include medium model chunks only (not full `dist/`).
   outputFileTracingIncludes: {
     "/app/api/images/**/*": [
       "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
-      "./node_modules/@imgly/background-removal-node/dist/**/*",
+      `${imglyDist}/resources.json`,
+      ...imglyBackgroundRemovalMediumChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },
   outputFileTracingExcludes: {
@@ -19,6 +24,14 @@ const nextConfig: NextConfig = {
       "./node_modules/onnxruntime-node/bin/napi-v3/darwin/**/*",
       "./node_modules/onnxruntime-node/bin/napi-v3/win32/**/*",
       "./node_modules/onnxruntime-node/bin/napi-v3/linux/arm64/**/*",
+      "./node_modules/@img/sharp-darwin-arm64/**/*",
+      "./node_modules/@img/sharp-darwin-x64/**/*",
+      "./node_modules/@img/sharp-libvips-darwin-arm64/**/*",
+      "./node_modules/@img/sharp-libvips-darwin-x64/**/*",
+      "./node_modules/@img/sharp-wasm32/**/*",
+      "./node_modules/@img/sharp-win32-*/**/*",
+      "./node_modules/@img/sharp-libvips-win32-*/**/*",
+      ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },
   images: {
