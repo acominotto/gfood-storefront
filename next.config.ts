@@ -3,6 +3,16 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Keep native addons out of the Turbopack bundle so `onnxruntime-node` loads
+  // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
+  // otherwise traced only the `.node` file and failed at runtime).
+  serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
+  outputFileTracingIncludes: {
+    "/app/api/images/**/*": [
+      "./node_modules/onnxruntime-node/bin/**/*",
+      "./node_modules/@imgly/background-removal-node/dist/**/*",
+    ],
+  },
   images: {
     remotePatterns: [
       {
