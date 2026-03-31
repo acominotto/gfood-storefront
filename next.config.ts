@@ -7,10 +7,18 @@ const nextConfig: NextConfig = {
   // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
   // otherwise traced only the `.node` file and failed at runtime).
   serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
+  // Only Linux x64 (Vercel's default Node runtime). `bin/**/*` adds ~130MB of other OS/arch.
   outputFileTracingIncludes: {
     "/app/api/images/**/*": [
-      "./node_modules/onnxruntime-node/bin/**/*",
+      "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
       "./node_modules/@imgly/background-removal-node/dist/**/*",
+    ],
+  },
+  outputFileTracingExcludes: {
+    "/app/api/images/**/*": [
+      "./node_modules/onnxruntime-node/bin/napi-v3/darwin/**/*",
+      "./node_modules/onnxruntime-node/bin/napi-v3/win32/**/*",
+      "./node_modules/onnxruntime-node/bin/napi-v3/linux/arm64/**/*",
     ],
   },
   images: {
