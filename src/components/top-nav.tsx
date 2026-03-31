@@ -3,22 +3,26 @@
 import { NavAccountMenu } from "@/components/nav-account-menu";
 import { NavCartButton } from "@/components/nav-cart-button";
 import { NavDeliveryDialog } from "@/components/nav-delivery-dialog";
+import { useNavbarStore } from "@/stores/navbar-store";
+import { usePathname } from "@/i18n/navigation";
 
-import { Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
+import { Flex, HStack, Image, Input, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { Link } from "./ui/link";
 
 export function TopNav() {
   const t = useTranslations();
+  const tCatalog = useTranslations("catalog");
+  const pathname = usePathname();
+  const isCatalogHome = pathname === "/";
+  const catalogSearch = useNavbarStore((s) => s.catalogSearch);
+  const setCatalogSearch = useNavbarStore((s) => s.setCatalogSearch);
 
   return (
-    <Flex
+    <Stack
       as="header"
-
-      justify="space-between"
-      align={{ base: "flex-start", md: "center" }}
-      direction={{ base: "column", md: "row" }}
-      gap={{ base: 4, md: 3 }}
+      data-storefront-top-nav=""
+      gap={{ base: 3, md: 3 }}
       py={{ base: 4, md: 5 }}
       px={{ base: 4, md: 8, lg: 10 }}
       borderBottomWidth="1px"
@@ -29,42 +33,84 @@ export function TopNav() {
       zIndex={1000}
       shadow="sm"
       backdropFilter="saturate(180%) blur(2px)"
+      w="full"
     >
-      <HStack gap={3} align="center" asChild>
-        <Link href="/" display="flex" alignItems="center" gap={3} _hover={{ textDecoration: "none" }}>
-          <Image
-            src="/gashi-logo.png"
-            alt="G-Food.ch"
-            h="40px"
-            w="auto"
-            maxW="min(100%, 200px)"
-          />
-          <Stack gap={0}>
-            <Text fontWeight="bold" color="gray.800" lineHeight="short">
-              GASHI International Food
-            </Text>
-            <Text fontSize="sm" color="gray.500" lineHeight="shorter">
-              Les saveurs d&apos;ailleurs
-            </Text>
-          </Stack>
-        </Link>
-      </HStack>
-      <Flex
-        direction={{ base: "column", sm: "row" }}
-        w={{ base: "full", md: "auto" }}
-        justify={{ base: "space-between", md: "flex-end" }}
-        align={{ base: "flex-start", sm: "center" }}
-        gap={{ base: 3, sm: 5 }}
-      >
-        <HStack gap={{ base: 3, md: 4 }} wrap="wrap">
-          <NavDeliveryDialog />
-          <Link variant="underline" href="/impressum">
-            {t("footer.impressum")}
+      <Flex justify="space-between" align="center" direction="row" gap={{ base: 3, md: 3 }} w="full" minW={0}>
+        <HStack gap={3} align="center" asChild>
+          <Link href="/" display="flex" alignItems="center" gap={3} _hover={{ textDecoration: "none" }} minW={0}>
+            <Image
+              src="/gashi-logo.png"
+              alt="G-Food.ch"
+              h="40px"
+              w="auto"
+              maxW="min(100%, 200px)"
+            />
+            <Stack gap={0}>
+              <Text fontWeight="bold" color="gray.800" lineHeight="short">
+                GASHI International Food
+              </Text>
+              <Text fontSize="sm" color="gray.500" lineHeight="shorter">
+                Les saveurs d&apos;ailleurs
+              </Text>
+            </Stack>
           </Link>
-          <NavCartButton />
-          <NavAccountMenu />
         </HStack>
+
+        {isCatalogHome ? (
+          <Flex
+            display={{ base: "none", md: "flex" }}
+            flex="1"
+            justify="center"
+            maxW="28rem"
+            minW={0}
+            px={2}
+          >
+            <Input
+              size="sm"
+              placeholder={tCatalog("searchPlaceholder")}
+              value={catalogSearch}
+              onChange={(e) => setCatalogSearch(e.target.value)}
+              bg="white"
+              borderColor="gray.200"
+              aria-label={tCatalog("searchPlaceholder")}
+            />
+          </Flex>
+        ) : null}
+
+        <Flex
+          display={{ base: "none", md: "flex" }}
+          direction="row"
+          w="auto"
+          justify="flex-end"
+          align="center"
+          gap={5}
+          flexShrink={0}
+        >
+          <HStack gap={{ base: 3, md: 4 }} wrap="wrap">
+            <NavDeliveryDialog />
+            <Link variant="underline" href="/impressum">
+              {t("footer.impressum")}
+            </Link>
+            <NavCartButton />
+            <NavAccountMenu />
+          </HStack>
+        </Flex>
       </Flex>
-    </Flex>
+
+      {isCatalogHome ? (
+        <Flex display={{ base: "flex", md: "none" }} w="full" minW={0}>
+          <Input
+            size="sm"
+            placeholder={tCatalog("searchPlaceholder")}
+            value={catalogSearch}
+            onChange={(e) => setCatalogSearch(e.target.value)}
+            bg="white"
+            borderColor="gray.200"
+            w="full"
+            aria-label={tCatalog("searchPlaceholder")}
+          />
+        </Flex>
+      ) : null}
+    </Stack>
   );
 }

@@ -4,7 +4,20 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.g-food.ch",
+      },
+      {
+        protocol: "https",
+        hostname: "g-food.ch",
+      },
+    ],
   },
   async redirects() {
     return [

@@ -17,6 +17,7 @@
     "closeDrawer": "Close",
     "andMore": "+{count} more",
     "myAccount": "My account",
+    "siteMenu": "Menu",
     "language": "Language",
     "localeFrench": "Français",
     "localeEnglish": "English",
@@ -26,11 +27,7 @@
   "catalog": {
     "title": "Products",
     "searchPlaceholder": "Search products",
-    "inStockOnly": "In stock only",
-    "category": "Category",
-    "minPrice": "Min price",
-    "maxPrice": "Max price",
-    "apply": "Apply",
+    "allCategories": "All",
     "addToCart": "Add",
     "removeFromCart": "Remove from cart",
     "noResults": "No products found",
@@ -38,7 +35,10 @@
     "inStock": "In stock",
     "outOfStock": "Out of stock",
     "backToCatalog": "Back to catalogue",
-    "breadcrumbHome": "Home"
+    "breadcrumbHome": "Home",
+    "promoBadge": "Under construction",
+    "promoTitle": "Promotions",
+    "promoDescription": "Offers and featured products will show up here soon."
   },
   "checkout": {
     "title": "Checkout",

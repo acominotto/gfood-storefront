@@ -4,6 +4,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { AppFooter } from "@/components/app-footer";
+import { MobileBottomBar } from "@/components/mobile-bottom-bar";
 import { AppProviders } from "@/components/providers";
 import { TopNav } from "@/components/top-nav";
 import { routing } from "@/i18n/routing";
@@ -40,7 +41,11 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Box as="main" flex="1" display="flex" flexDirection="column" minW={0}>
             <Container
               maxW="min(100%, 120rem)"
-              py={{ base: 5, md: 10 }}
+              pt={{ base: 5, md: 10 }}
+              pb={{
+                base: "calc(1.25rem + 4.5rem + env(safe-area-inset-bottom, 0px))",
+                md: 10,
+              }}
               px={{ base: 3, sm: 4, md: 8 }}
               flex="1"
               display="flex"
@@ -53,6 +58,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             </Container>
           </Box>
           <AppFooter />
+          <MobileBottomBar />
         </Flex>
       </AppProviders>
     </NextIntlClientProvider>

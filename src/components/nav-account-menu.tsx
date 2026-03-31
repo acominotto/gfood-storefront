@@ -10,34 +10,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { LOCALE_NAV_META } from "@/lib/locale-nav-meta";
 import { Box, HStack, Image, Text } from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { FiUser } from "react-icons/fi";
 import { LuCheck } from "react-icons/lu";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "./ui/link";
 
-const LOCALE_META: Record<
-  (typeof routing.locales)[number],
-  { labelKey: "localeFrench" | "localeEnglish" | "localeGerman" | "localeItalian"; flagSrc: string }
-> = {
-  fr: {
-    labelKey: "localeFrench",
-    flagSrc: "https://flagcdn.com/w40/fr.png",
-  },
-  en: {
-    labelKey: "localeEnglish",
-    flagSrc: "https://flagcdn.com/w40/gb.png",
-  },
-  de: {
-    labelKey: "localeGerman",
-    flagSrc: "https://flagcdn.com/w40/de.png",
-  },
-  it: {
-    labelKey: "localeItalian",
-    flagSrc: "https://flagcdn.com/w40/it.png",
-  },
-};
+const LANG_MENU_CLOSE_MS = 180;
 
 export function NavAccountMenu() {
   const t = useTranslations("nav");
@@ -46,8 +28,43 @@ export function NavAccountMenu() {
   const locale = useLocale();
   const pathname = usePathname();
 
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearLangCloseTimer() {
+    if (langCloseTimer.current != null) {
+      clearTimeout(langCloseTimer.current);
+      langCloseTimer.current = null;
+    }
+  }
+
+  function openLangMenu() {
+    clearLangCloseTimer();
+    setLangMenuOpen(true);
+  }
+
+  function scheduleLangMenuClose() {
+    clearLangCloseTimer();
+    langCloseTimer.current = setTimeout(() => setLangMenuOpen(false), LANG_MENU_CLOSE_MS);
+  }
+
+  useEffect(() => () => clearLangCloseTimer(), []);
+
   return (
-    <MenuRoot>
+    <MenuRoot
+      positioning={{
+        placement: "bottom-end",
+        gutter: 2,
+        offset: { mainAxis: -8 },
+        strategy: "fixed",
+      }}
+      onOpenChange={(d) => {
+        if (!d.open) {
+          clearLangCloseTimer();
+          setLangMenuOpen(false);
+        }
+      }}
+    >
       <MenuTrigger asChild>
         <Button size="sm" colorPalette="brand" aria-haspopup="menu">
           <FiUser />
@@ -69,11 +86,49 @@ export function NavAccountMenu() {
           </MenuItem>
         ) : null}
 
-        <MenuRoot positioning={{ placement: "right-start", gutter: 2 }}>
-          <MenuTriggerItem value="language">{t("language")}</MenuTriggerItem>
-          <MenuContent minW="11rem">
+        <MenuRoot
+          open={langMenuOpen}
+          onOpenChange={(d) => {
+            setLangMenuOpen(d.open);
+            if (d.open) clearLangCloseTimer();
+          }}
+          positioning={{
+            placement: "right-start",
+            gutter: 4,
+            offset: { crossAxis: -6 },
+            strategy: "fixed",
+          }}
+        >
+          <MenuTriggerItem
+            value="language"
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") {
+                openLangMenu();
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType === "mouse") {
+                scheduleLangMenuClose();
+              }
+            }}
+          >
+            {t("language")}
+          </MenuTriggerItem>
+          <MenuContent
+            minW="11rem"
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") {
+                openLangMenu();
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType === "mouse") {
+                scheduleLangMenuClose();
+              }
+            }}
+          >
             {routing.locales.map((loc) => {
-              const meta = LOCALE_META[loc];
+              const meta = LOCALE_NAV_META[loc];
               return (
                 <MenuItem key={loc} value={loc} asChild>
                   <Link href={pathname} locale={loc}>

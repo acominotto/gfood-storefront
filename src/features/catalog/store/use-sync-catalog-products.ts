@@ -2,10 +2,12 @@
 
 import { useCatalogFilterStore } from "@/features/catalog/store/catalog-filters";
 import { useProductsStore } from "@/features/catalog/store/products-store";
+import { useNavbarStore } from "@/stores/navbar-store";
 import { useEffect, useMemo } from "react";
 
 export function useSyncCatalogProducts(perPage: number) {
-  const { search, category, minPrice, maxPrice, inStock } = useCatalogFilterStore();
+  const category = useCatalogFilterStore((s) => s.category);
+  const catalogSearch = useNavbarStore((s) => s.catalogSearch);
 
   const baseQuery = useMemo(() => {
     const params = new URLSearchParams({
@@ -14,23 +16,14 @@ export function useSyncCatalogProducts(perPage: number) {
       order: "asc",
     });
 
-    if (search) {
-      params.set("search", search);
+    if (catalogSearch) {
+      params.set("search", catalogSearch);
     }
     if (category) {
       params.set("category", category);
     }
-    if (minPrice) {
-      params.set("minPrice", minPrice);
-    }
-    if (maxPrice) {
-      params.set("maxPrice", maxPrice);
-    }
-    if (inStock) {
-      params.set("inStock", "true");
-    }
     return params;
-  }, [category, inStock, maxPrice, minPrice, perPage, search]);
+  }, [category, catalogSearch, perPage]);
 
   const signature = baseQuery.toString();
   const resetAndFetchFirstPage = useProductsStore((s) => s.resetAndFetchFirstPage);
