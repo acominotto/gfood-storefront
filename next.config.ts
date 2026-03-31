@@ -31,6 +31,9 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-wasm32/**/*",
       "./node_modules/@img/sharp-win32-*/**/*",
       "./node_modules/@img/sharp-libvips-win32-*/**/*",
+      // Runtime does not need C headers bundled with sharp's prebuild vendor trees.
+      "./node_modules/sharp/vendor/**/include/**/*",
+      "./node_modules/@imgly/background-removal-node/node_modules/sharp/vendor/**/include/**/*",
       ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
     ],
   },

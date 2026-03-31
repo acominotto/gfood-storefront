@@ -2,6 +2,7 @@
   "name": "storefront",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.29.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -37,5 +38,17 @@
     "eslint-config-next": "16.2.0",
     "typescript": "^5",
     "vitest": "^4.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "onnxruntime-node",
+      "sharp",
+      "unrs-resolver"
+    ],
+    "overrides": {
+      "sharp": "^0.34.5"
+    }
   }
 }
