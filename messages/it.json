@@ -22,7 +22,9 @@
     "localeFrench": "Français",
     "localeEnglish": "English",
     "localeGerman": "Deutsch",
-    "localeItalian": "Italiano"
+    "localeItalian": "Italiano",
+    "mobileNav": "Navigazione negozio",
+    "cartAriaWithCount": "{count, plural, one {Carrello, 1 articolo} other {Carrello, # articoli}}"
   },
   "catalog": {
     "title": "Prodotti",
@@ -43,7 +45,30 @@
   },
   "checkout": {
     "title": "Cassa",
-    "submit": "Effettua ordine"
+    "submit": "Effettua ordine",
+    "loading": "Caricamento cassa…",
+    "emptyCart": "Il carrello è vuoto",
+    "emptyCartHint": "Aggiungi prodotti prima di procedere.",
+    "thankYou": "Grazie",
+    "orderReceived": "Abbiamo ricevuto il tuo ordine n. {id}.",
+    "billing": "Fatturazione",
+    "shipping": "Spedizione",
+    "sameShipping": "Spedire allo stesso indirizzo",
+    "shippingMethod": "Metodo di spedizione",
+    "shipment": "Spedizione",
+    "paymentMethod": "Metodo di pagamento",
+    "noPaymentMethods": "Nessun metodo di pagamento disponibile per questo carrello. Abilita i gateway in WooCommerce.",
+    "orderNote": "Note sull’ordine",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "company": "Azienda",
+    "address": "Indirizzo",
+    "address2": "Riga indirizzo 2",
+    "city": "Città",
+    "postcode": "CAP",
+    "country": "Codice paese",
+    "email": "E-mail",
+    "phone": "Telefono"
   },
   "delivery": {
     "title": "Consegna",

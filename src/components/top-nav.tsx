@@ -6,9 +6,43 @@ import { NavDeliveryDialog } from "@/components/nav-delivery-dialog";
 import { useNavbarStore } from "@/stores/navbar-store";
 import { usePathname } from "@/i18n/navigation";
 
-import { Flex, HStack, Image, Input, Stack, Text } from "@chakra-ui/react";
+import { Flex, HStack, Image, Input, InputGroup, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
+import { LuSearch } from "react-icons/lu";
 import { Link } from "./ui/link";
+
+function CatalogSearchField({
+  catalogSearch,
+  onChange,
+  placeholder,
+  width,
+}: {
+  catalogSearch: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  width?: string;
+}) {
+  return (
+    <InputGroup
+      w={width ?? "full"}
+      borderRadius="full"
+      startElement={<LuSearch aria-hidden size={18} />}
+      startElementProps={{ pointerEvents: "none" }}
+    >
+      <Input
+        size="sm"
+        placeholder={placeholder}
+        value={catalogSearch}
+        onChange={(e) => onChange(e.target.value)}
+        bg="white"
+        borderColor="gray.200"
+        borderRadius="full"
+        textAlign="right"
+        aria-label={placeholder}
+      />
+    </InputGroup>
+  );
+}
 
 export function TopNav() {
   const t = useTranslations();
@@ -65,14 +99,10 @@ export function TopNav() {
             minW={0}
             px={2}
           >
-            <Input
-              size="sm"
+            <CatalogSearchField
+              catalogSearch={catalogSearch}
+              onChange={setCatalogSearch}
               placeholder={tCatalog("searchPlaceholder")}
-              value={catalogSearch}
-              onChange={(e) => setCatalogSearch(e.target.value)}
-              bg="white"
-              borderColor="gray.200"
-              aria-label={tCatalog("searchPlaceholder")}
             />
           </Flex>
         ) : null}
@@ -99,15 +129,11 @@ export function TopNav() {
 
       {isCatalogHome ? (
         <Flex display={{ base: "flex", md: "none" }} w="full" minW={0}>
-          <Input
-            size="sm"
+          <CatalogSearchField
+            catalogSearch={catalogSearch}
+            onChange={setCatalogSearch}
             placeholder={tCatalog("searchPlaceholder")}
-            value={catalogSearch}
-            onChange={(e) => setCatalogSearch(e.target.value)}
-            bg="white"
-            borderColor="gray.200"
-            w="full"
-            aria-label={tCatalog("searchPlaceholder")}
+            width="full"
           />
         </Flex>
       ) : null}

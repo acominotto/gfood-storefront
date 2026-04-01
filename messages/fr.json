@@ -22,7 +22,9 @@
     "localeFrench": "Français",
     "localeEnglish": "English",
     "localeGerman": "Deutsch",
-    "localeItalian": "Italiano"
+    "localeItalian": "Italiano",
+    "mobileNav": "Navigation du magasin",
+    "cartAriaWithCount": "{count, plural, one {Panier, 1 article} other {Panier, # articles}}"
   },
   "catalog": {
     "title": "Nos produits",
@@ -43,7 +45,30 @@
   },
   "checkout": {
     "title": "Finaliser votre commande",
-    "submit": "Payer maintenant"
+    "submit": "Payer maintenant",
+    "loading": "Chargement du paiement…",
+    "emptyCart": "Votre panier est vide",
+    "emptyCartHint": "Ajoutez des produits avant de payer.",
+    "thankYou": "Merci",
+    "orderReceived": "Nous avons bien reçu votre commande n°{id}.",
+    "billing": "Facturation",
+    "shipping": "Livraison",
+    "sameShipping": "Livrer à la même adresse",
+    "shippingMethod": "Mode de livraison",
+    "shipment": "Envoi",
+    "paymentMethod": "Mode de paiement",
+    "noPaymentMethods": "Aucun mode de paiement n’est disponible pour ce panier. Activez les passerelles dans WooCommerce.",
+    "orderNote": "Note de commande",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "company": "Société",
+    "address": "Adresse",
+    "address2": "Ligne d’adresse 2",
+    "city": "Ville",
+    "postcode": "Code postal",
+    "country": "Code pays",
+    "email": "E-mail",
+    "phone": "Téléphone"
   },
   "delivery": {
     "title": "Livraison",

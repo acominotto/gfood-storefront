@@ -22,7 +22,9 @@
     "localeFrench": "Français",
     "localeEnglish": "English",
     "localeGerman": "Deutsch",
-    "localeItalian": "Italiano"
+    "localeItalian": "Italiano",
+    "mobileNav": "Store navigation",
+    "cartAriaWithCount": "{count, plural, one {Cart, 1 item} other {Cart, # items}}"
   },
   "catalog": {
     "title": "Products",
@@ -43,7 +45,30 @@
   },
   "checkout": {
     "title": "Checkout",
-    "submit": "Place order"
+    "submit": "Place order",
+    "loading": "Loading checkout…",
+    "emptyCart": "Your cart is empty",
+    "emptyCartHint": "Add products before checking out.",
+    "thankYou": "Thank you",
+    "orderReceived": "We received your order #{id}.",
+    "billing": "Billing",
+    "shipping": "Shipping",
+    "sameShipping": "Ship to the same address",
+    "shippingMethod": "Shipping method",
+    "shipment": "Shipment",
+    "paymentMethod": "Payment method",
+    "noPaymentMethods": "No payment methods are available for this cart. Enable gateways in WooCommerce.",
+    "orderNote": "Order note",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "company": "Company",
+    "address": "Address",
+    "address2": "Address line 2",
+    "city": "City",
+    "postcode": "Postal code",
+    "country": "Country code",
+    "email": "Email",
+    "phone": "Phone"
   },
   "delivery": {
     "title": "Delivery",

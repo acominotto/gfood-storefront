@@ -20,12 +20,25 @@ export async function getWooSessionHeaders() {
   };
 }
 
-export async function persistWooSessionHeaders(headers: Headers) {
+type PersistWooSessionOptions = {
+  /**
+   * When false, skip updating `woo_cart_token` from this response.
+   * WooCommerce `GET /checkout` can emit a Cart-Token that does not match the
+   * active cart session; persisting it makes the next `GET /cart` return empty.
+   */
+  persistCartToken?: boolean;
+};
+
+export async function persistWooSessionHeaders(
+  headers: Headers,
+  options: PersistWooSessionOptions = {},
+) {
+  const persistCartToken = options.persistCartToken !== false;
   const cartToken = headers.get("cart-token");
   const nonce = headers.get("nonce");
 
   const cookieStore = await cookies();
-  if (cartToken) {
+  if (persistCartToken && cartToken) {
     cookieStore.set(CART_TOKEN_COOKIE, cartToken, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",

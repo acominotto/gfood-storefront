@@ -6,6 +6,7 @@ import { CatalogFilterBar } from "@/features/catalog/components/filters";
 import { ProductCard } from "@/features/catalog/components/product-card";
 import { useIntersectionFetchNext } from "@/features/catalog/hooks/use-intersection-fetch-next";
 import { useResizeObserverHeight } from "@/features/catalog/hooks/use-resize-observer-height";
+import { useResizeObserverWidth } from "@/features/catalog/hooks/use-resize-observer-width";
 import { useSyncCatalogFiltersFromSearchParams } from "@/features/catalog/hooks/use-sync-catalog-filters-from-url";
 import { useSyncCatalogSearchToUrl } from "@/features/catalog/hooks/use-sync-catalog-search-to-url";
 import { selectHasNextPage, useProductsStore } from "@/features/catalog/store/products-store";
@@ -13,27 +14,33 @@ import { useSyncCatalogProducts } from "@/features/catalog/store/use-sync-catalo
 import { useScrollRevealBar } from "@/hooks/use-scroll-reveal-bar";
 import { useNavbarStore } from "@/stores/navbar-store";
 import { useStorefrontTopNavHeight } from "@/hooks/use-storefront-top-nav-height";
+import { MOBILE_FLOAT_ABOVE_NAV_BOTTOM } from "@/lib/mobile-bottom-chrome";
 import type { Product } from "@/server/schemas/catalog";
 import { Button } from "@/components/ui/button";
-import {
-  Box,
-  Flex,
-  HStack,
-  Pagination,
-  SimpleGrid,
-  Spinner,
-  Stack,
-  Text,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Box, Flex, HStack, Pagination, Spinner, Stack, Text, useBreakpointValue } from "@chakra-ui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
-/** Matches `SimpleGrid` `columns` so each loaded page is full rows. Max columns × rows ≤ 48 (API `perPage` cap). */
-const CATALOG_GRID_COLUMNS = { base: 1, sm: 2, md: 3, lg: 4, xl: 5, "2xl": 6 } as const;
-const ROWS_PER_CATALOG_PAGE = 8;
+/** Fixed card width + gaps; grid uses `repeat(auto-fill, …)` so columns pack tightly (no huge in-cell whitespace). */
+const CATALOG_CARD_WIDTH_PX = 200;
+const CATALOG_COLUMN_GAP_PX = 6;
+const CATALOG_ROW_GAP_PX = 12;
 
-const MOBILE_CHROME_BOTTOM = "calc(1rem + 4.5rem + env(safe-area-inset-bottom, 0px))";
+/** Fallback column count before the catalog container is measured. Max columns × rows ≤ 48 (API `perPage` cap). */
+const CATALOG_COLUMN_FALLBACK = { base: 1, sm: 2, md: 3, lg: 4, xl: 5, "2xl": 6 } as const;
+const ROWS_PER_CATALOG_PAGE = 6;
+const MAX_CATALOG_COLUMNS = Math.floor(48 / ROWS_PER_CATALOG_PAGE);
+
+function catalogColumnsForContainerWidth(widthPx: number) {
+  if (widthPx <= 0) {
+    return 1;
+  }
+  const cell = CATALOG_CARD_WIDTH_PX + CATALOG_COLUMN_GAP_PX;
+  const n = Math.floor((widthPx + CATALOG_COLUMN_GAP_PX) / cell);
+  return Math.max(1, Math.min(MAX_CATALOG_COLUMNS, n));
+}
+
+const MOBILE_CHROME_BOTTOM = MOBILE_FLOAT_ABOVE_NAV_BOTTOM;
 
 /** Extra space below the fixed filter on md+ so the hero / grid don’t crowd the bar (shadow, subpixel sizing). */
 const FILTER_BAR_STACK_GAP_MD = 20;
@@ -46,6 +53,7 @@ export function CatalogPage() {
   const openCart = useCartStore((s) => s.openCart);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const filterBarRef = useRef<HTMLDivElement | null>(null);
+  const catalogWidthRef = useRef<HTMLDivElement | null>(null);
   const [showBottomPager, setShowBottomPager] = useState(false);
   const [pagerExpanded, setPagerExpanded] = useState(false);
   const [activePage, setActivePage] = useState(1);
@@ -54,8 +62,13 @@ export function CatalogPage() {
   const topNavHeightPx = useStorefrontTopNavHeight();
   const filterBarTop = topNavHeightPx > 0 ? `${topNavHeightPx}px` : "0";
 
+  const catalogContainerWidth = useResizeObserverWidth(catalogWidthRef);
+  const breakpointColumnFallback =
+    useBreakpointValue(CATALOG_COLUMN_FALLBACK, { fallback: "md" }) ?? CATALOG_COLUMN_FALLBACK.md;
   const columnCount =
-    useBreakpointValue(CATALOG_GRID_COLUMNS, { fallback: "md" }) ?? CATALOG_GRID_COLUMNS.md;
+    catalogContainerWidth > 0
+      ? catalogColumnsForContainerWidth(catalogContainerWidth)
+      : breakpointColumnFallback;
   const filterStackExtraPx =
     useBreakpointValue({ base: 0, md: FILTER_BAR_STACK_GAP_MD }, { fallback: "md" }) ?? 0;
   const perPage = columnCount * ROWS_PER_CATALOG_PAGE;
@@ -154,25 +167,32 @@ export function CatalogPage() {
           <>
             {allProducts.length > 0 ? (
               <Stack gap={{ base: 3, md: 6 }}>
-                {displayPages.map((result) => (
-                  <Box key={result.pagination.page} id={catalogPageSectionId(result.pagination.page)} minW={0} w="full">
-                    <SimpleGrid
-                      columns={CATALOG_GRID_COLUMNS}
-                      gap={{ base: 3, md: 4 }}
-                      w="full"
-                      minW={0}
-                    >
-                      {[...result.products].sort(compareProductsByStockThenTitle).map((product) => (
-                        <ProductCard
-                          key={`${result.pagination.page}-${product.id}`}
-                          product={product}
-                          locale={locale}
-                          onOpenCart={openCart}
-                        />
-                      ))}
-                    </SimpleGrid>
-                  </Box>
-                ))}
+                <Box ref={catalogWidthRef} w="full" minW={0}>
+                  <Stack gap={{ base: 3, md: 6 }}>
+                    {displayPages.map((result) => (
+                      <Box key={result.pagination.page} id={catalogPageSectionId(result.pagination.page)} minW={0} w="full">
+                        <Box
+                          display="grid"
+                          w="full"
+                          minW={0}
+                          justifyContent="center"
+                          columnGap={`${CATALOG_COLUMN_GAP_PX}px`}
+                          rowGap={`${CATALOG_ROW_GAP_PX}px`}
+                          gridTemplateColumns={`repeat(auto-fill, ${CATALOG_CARD_WIDTH_PX}px)`}
+                        >
+                          {[...result.products].sort(compareProductsByStockThenTitle).map((product) => (
+                            <ProductCard
+                              key={`${result.pagination.page}-${product.id}`}
+                              product={product}
+                              locale={locale}
+                              onOpenCart={openCart}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
                 <Box ref={loadMoreRef} h="1px" />
                 {showSearchInProgress ? (
                   <Flex justify="center" align="center" gap={3} py={8}>

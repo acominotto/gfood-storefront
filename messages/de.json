@@ -22,7 +22,9 @@
     "localeFrench": "Français",
     "localeEnglish": "English",
     "localeGerman": "Deutsch",
-    "localeItalian": "Italiano"
+    "localeItalian": "Italiano",
+    "mobileNav": "Shop-Navigation",
+    "cartAriaWithCount": "{count, plural, one {Warenkorb, 1 Artikel} other {Warenkorb, # Artikel}}"
   },
   "catalog": {
     "title": "Produkte",
@@ -43,7 +45,30 @@
   },
   "checkout": {
     "title": "Kasse",
-    "submit": "Bestellung aufgeben"
+    "submit": "Bestellung aufgeben",
+    "loading": "Kasse wird geladen…",
+    "emptyCart": "Ihr Warenkorb ist leer",
+    "emptyCartHint": "Bitte legen Sie Produkte in den Warenkorb.",
+    "thankYou": "Vielen Dank",
+    "orderReceived": "Wir haben Ihre Bestellung #{id} erhalten.",
+    "billing": "Rechnungsadresse",
+    "shipping": "Lieferadresse",
+    "sameShipping": "Lieferung an dieselbe Adresse",
+    "shippingMethod": "Versandart",
+    "shipment": "Sendung",
+    "paymentMethod": "Zahlungsart",
+    "noPaymentMethods": "Für diesen Warenkorb sind keine Zahlungsarten verfügbar. Aktivieren Sie Zahlungsarten in WooCommerce.",
+    "orderNote": "Bestellhinweis",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "company": "Firma",
+    "address": "Adresse",
+    "address2": "Adresszeile 2",
+    "city": "Ort",
+    "postcode": "PLZ",
+    "country": "Ländercode",
+    "email": "E-Mail",
+    "phone": "Telefon"
   },
   "delivery": {
     "title": "Lieferung",

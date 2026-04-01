@@ -1,14 +1,14 @@
 "use client";
 
 import { CartQuantityRow } from "@/components/cart-quantity-row";
-import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
 import { productPath } from "@/lib/product-url";
 import type { Product } from "@/server/schemas/catalog";
-import { Badge, Box, Card, HStack, Image, Stack, Text } from "@chakra-ui/react";
+import { Badge, Box, Card, HStack, IconButton, Image, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
+import { FiShoppingCart } from "react-icons/fi";
 
 type ProductCardProps = {
   product: Product;
@@ -81,10 +81,12 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
     <Card.Root
       borderWidth="1px"
       borderColor="gray.200"
-      rounded="xl"
+      rounded="lg"
       cursor="pointer"
       bg="white"
       overflow="hidden"
+      w="200px"
+      maxW="200px"
       minW={0}
       h="full"
       display="flex"
@@ -112,9 +114,9 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
         </Link>
       </Card.Header>
       <Card.Body
-        p={3}
-        mt="-4"
-        borderTopRadius="xl"
+        p={2}
+        mt="-3"
+        borderTopRadius="lg"
         bg="white"
         overflow="hidden"
         flex="1"
@@ -122,12 +124,14 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
         display="flex"
         flexDirection="column"
       >
-        <Stack gap={2} flex="1" minH={0}>
+        <Stack gap={1} flex="1" minH={0}>
           <Link
             href={productPath(product)}
             variant="plain"
             color="inherit"
             fontWeight="semibold"
+            fontSize="xs"
+            lineHeight="1.25"
             lineClamp={2}
             onClick={(e) => e.stopPropagation()}
             _hover={{ textDecoration: "underline" }}
@@ -135,40 +139,63 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
             {product.name}
           </Link>
           {translation ? (
-            <Text fontSize="sm" color="gray.600" lineClamp={2}>
+            <Text fontSize="2xs" color="gray.600" lineClamp={2} lineHeight="1.25">
               {translation}
             </Text>
           ) : null}
-        </Stack>
-        <HStack justify="space-between" align="center" w="full" flexShrink={0} pt={2}>
-          <Badge colorPalette={product.is_in_stock ? "green" : "red"} variant="subtle">
+          <Badge
+            colorPalette={product.is_in_stock ? "green" : "red"}
+            variant="subtle"
+            w="fit-content"
+            fontSize="2xs"
+            px={1.5}
+            py={0}
+          >
             {product.is_in_stock ? t("inStock") : t("outOfStock")}
           </Badge>
-          <Text fontWeight="bold">{formatPrice(product.prices?.price, locale)}</Text>
+        </Stack>
+        <HStack
+          justify="space-between"
+          align="flex-end"
+          w="full"
+          flexShrink={0}
+          pt={1.5}
+          gap={1}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Text fontWeight="bold" fontSize="sm" lineHeight="1.2" minW={0} lineClamp={1}>
+            {formatPrice(product.prices?.price, locale)}
+          </Text>
+          <Box flexShrink={0}>
+            {quantity > 0 ? (
+              <CartQuantityRow
+                quantity={quantity}
+                disabled={isUpdatingCart}
+                compact
+                dense
+                tight
+                onDecrease={() => onDecrease()}
+                onIncrease={() => onIncrease()}
+                onRemove={() => onRemove()}
+                removeAriaLabel={t("removeFromCart")}
+              />
+            ) : (
+              <IconButton
+                aria-label={t("addToCart")}
+                size="xs"
+                variant="outline"
+                colorPalette="brand"
+                rounded="full"
+                disabled={!canAddToCart}
+                loading={isUpdatingCart}
+                onClick={() => void onAdd()}
+              >
+                <FiShoppingCart size={12} aria-hidden />
+              </IconButton>
+            )}
+          </Box>
         </HStack>
-        <Box mt={3} flexShrink={0} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-          {quantity > 0 ? (
-            <CartQuantityRow
-              quantity={quantity}
-              disabled={isUpdatingCart}
-              onDecrease={() => onDecrease()}
-              onIncrease={() => onIncrease()}
-              onRemove={() => onRemove()}
-              removeAriaLabel={t("removeFromCart")}
-            />
-          ) : (
-            <Button
-              size="sm"
-              colorPalette="brand"
-              borderRadius="full"
-              onClick={() => onAdd()}
-              disabled={!canAddToCart}
-              w="full"
-            >
-              {t("addToCart")}
-            </Button>
-          )}
-        </Box>
       </Card.Body>
     </Card.Root>
   );

@@ -40,6 +40,21 @@ npm run dev
 - `GET|POST|PATCH|PUT|DELETE /api/woo/*` proxy to WooCommerce Store API (same-origin; avoids CORS to WordPress)
 - `GET /api/auth/me`
 - `GET /api/images/*` optimized image proxy
+
+## Commerce (WooCommerce)
+
+All cart, checkout, shipping, tax, and payment rules are configured in **WordPress / WooCommerce** (and plugins). The storefront calls the **WooCommerce Store API** via `/api/woo/*` only; it does not duplicate Woo business logic.
+
+Typical flow:
+
+1. **Cart** — `GET/POST/PATCH/DELETE …/wc/store/v1/cart` (proxied as `/api/woo/cart`, etc.). The cart payload includes `payment_methods`, `shipping_rates`, `needs_shipping`, `needs_payment`, and addresses when Woo provides them.
+2. **Checkout draft** — `GET` and `PUT /wc/store/v1/checkout` to load/update the draft order and recalculate totals (`__experimental_calc_totals=true` on `PUT`).
+3. **Shipping** — `POST /wc/store/v1/cart/select-shipping-rate?package_id=…&rate_id=…` when the customer chooses a rate.
+4. **Place order** — `POST /wc/store/v1/checkout` with billing and shipping addresses, `payment_method`, optional `customer_note` / `payment_data`. If the gateway returns `payment_result.redirect_url`, the app sends the browser there.
+
+Configure **payment gateways**, **shipping zones**, and **tax** in Woo. Plugins that extend the Store API (e.g. via `extensions` on cart/checkout) are supported as long as responses stay JSON-shaped; plugins that only run on the classic/block checkout **page** in WordPress may require a redirect to that page or extra integration.
+
+Environment variables: see `.env.example` (`WP_BASE_URL`, `WOO_STORE_API_BASE`, etc.).
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

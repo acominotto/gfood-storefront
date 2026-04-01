@@ -8,11 +8,11 @@ import { Link } from "@/components/ui/link";
 import { LOCALE_NAV_META } from "@/lib/locale-nav-meta";
 import { usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { Box, Flex, HStack, IconButton, Image, Separator, Stack, Text } from "@chakra-ui/react";
+import { Box, Button as ChakraButton, Grid, HStack, Image, Separator, Stack, Text } from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { LuCheck, LuMenu } from "react-icons/lu";
+import { LuCheck, LuHouse, LuMenu } from "react-icons/lu";
 
 export function MobileBottomBar() {
   const tNav = useTranslations("nav");
@@ -24,42 +24,83 @@ export function MobileBottomBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [deliveryOpen, setDeliveryOpen] = useState(false);
 
+  const isShopActive = pathname === "/";
+
   return (
     <>
-      <Flex
-        display={{ base: "flex", md: "none" }}
+      <Grid
+        as="nav"
+        aria-label={tNav("mobileNav")}
+        display={{ base: "grid", md: "none" }}
         position="fixed"
         left={0}
         right={0}
         bottom={0}
         zIndex={950}
-        bg="brand.50"
+        templateColumns="1fr 1fr 1fr"
+        alignItems="stretch"
+        maxW="100vw"
+        bg="brand.50/92"
+        backdropFilter="saturate(180%) blur(10px)"
         borderTopWidth="1px"
         borderColor="gray.200"
-        px={4}
-        py={2}
+        px={2}
+        pt={1}
         pb="calc(0.5rem + env(safe-area-inset-bottom, 0px))"
-        justify="space-between"
-        align="center"
-        gap={4}
-        shadow="0 -4px 12px rgba(0,0,0,0.06)"
+        shadow="0 -4px 16px rgba(0,0,0,0.06)"
       >
-        <NavCartButton compact />
-        <IconButton
+        <Link
+          href="/"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={0.5}
+          minH="12"
+          minW={0}
+          py={2}
+          px={1}
+          borderRadius="md"
+          textAlign="center"
+          color={isShopActive ? "brand.700" : "fg.muted"}
+          fontWeight={isShopActive ? "semibold" : "normal"}
+          _hover={{ textDecoration: "none", bg: "blackAlpha.50" }}
+          aria-current={isShopActive ? "page" : undefined}
+        >
+          <LuHouse size={22} aria-hidden />
+          <Text fontSize="xs" lineHeight="short" fontWeight="medium">
+            {tNav("catalog")}
+          </Text>
+        </Link>
+
+        <NavCartButton variant="bottomNav" />
+
+        <ChakraButton
           type="button"
-          variant="outline"
-          colorPalette="brand"
-          bg="white"
-          size="md"
-          rounded="lg"
-          flexShrink={0}
+          variant="ghost"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={0.5}
+          flex="1"
+          minH="12"
+          minW={0}
+          w="full"
+          h="auto"
+          py={2}
+          px={1}
+          rounded="md"
+          color="fg.muted"
           aria-label={tNav("siteMenu")}
           aria-haspopup="dialog"
           onClick={() => setMenuOpen(true)}
         >
-          <LuMenu size={22} />
-        </IconButton>
-      </Flex>
+          <LuMenu size={22} aria-hidden />
+          <Text fontSize="xs" lineHeight="short" fontWeight="medium">
+            {tNav("siteMenu")}
+          </Text>
+        </ChakraButton>
+      </Grid>
 
       <Drawer.Root open={menuOpen} onOpenChange={(e) => setMenuOpen(e.open)} placement="bottom">
         <Drawer.Content roundedTop="2xl" maxH="85dvh">

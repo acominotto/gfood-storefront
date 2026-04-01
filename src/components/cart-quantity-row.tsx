@@ -9,6 +9,10 @@ export type CartQuantityRowProps = {
   disabled?: boolean;
   /** When true, row is only as wide as controls need (e.g. cart drawer); default fills parent (product card). */
   compact?: boolean;
+  /** Smaller controls and typography (e.g. product cards). */
+  dense?: boolean;
+  /** Narrow layout: minimal gaps (use with `dense` on small cards). */
+  tight?: boolean;
   onDecrease: () => void | Promise<void>;
   onIncrease: () => void | Promise<void>;
   onRemove: () => void | Promise<void>;
@@ -20,31 +24,44 @@ export function CartQuantityRow({
   quantity,
   disabled,
   compact = false,
+  dense = false,
+  tight = false,
   onDecrease,
   onIncrease,
   onRemove,
   removeAriaLabel,
 }: CartQuantityRowProps) {
+  const btnSize = dense ? "xs" : "sm";
+  const gap = tight ? 0 : dense ? 1 : 2;
+  const qtyMinW = tight ? "14px" : dense ? "18px" : "24px";
+  const qtyFontSize = tight ? "2xs" : dense ? "xs" : undefined;
+  const trashSize = tight ? 11 : dense ? 14 : undefined;
   return (
-    <HStack gap={2} w={compact ? "fit-content" : "full"} maxW="100%">
-      <Button size="sm" variant="outline" colorPalette="brand" disabled={disabled} onClick={() => void onDecrease()}>
+    <HStack gap={gap} w={compact ? "fit-content" : "full"} maxW="100%">
+      <Button size={btnSize} variant="outline" colorPalette="brand" disabled={disabled} onClick={() => void onDecrease()}>
         -
       </Button>
-      <Text minW="24px" textAlign="center" fontWeight="semibold" flex={compact ? undefined : "1"}>
+      <Text
+        minW={qtyMinW}
+        textAlign="center"
+        fontWeight="semibold"
+        fontSize={qtyFontSize}
+        flex={compact ? undefined : "1"}
+      >
         {quantity}
       </Text>
-      <Button size="sm" variant="outline" colorPalette="brand" disabled={disabled} onClick={() => void onIncrease()}>
+      <Button size={btnSize} variant="outline" colorPalette="brand" disabled={disabled} onClick={() => void onIncrease()}>
         +
       </Button>
       <IconButton
         aria-label={removeAriaLabel}
-        size="sm"
+        size={btnSize}
         variant="ghost"
         colorPalette="brand"
         disabled={disabled}
         onClick={() => void onRemove()}
       >
-        <FiTrash2 />
+        <FiTrash2 size={trashSize} />
       </IconButton>
     </HStack>
   );

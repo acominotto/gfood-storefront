@@ -8,6 +8,7 @@ import { MobileBottomBar } from "@/components/mobile-bottom-bar";
 import { AppProviders } from "@/components/providers";
 import { TopNav } from "@/components/top-nav";
 import { routing } from "@/i18n/routing";
+import { MOBILE_MAIN_PADDING_BOTTOM } from "@/lib/mobile-bottom-chrome";
 import { openGraphForLocale } from "@/lib/site-metadata";
 
 type Props = {
@@ -43,7 +44,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               maxW="min(100%, 120rem)"
               pt={{ base: 5, md: 10 }}
               pb={{
-                base: "calc(1.25rem + 4.5rem + env(safe-area-inset-bottom, 0px))",
+                base: MOBILE_MAIN_PADDING_BOTTOM,
                 md: 10,
               }}
               px={{ base: 3, sm: 4, md: 8 }}

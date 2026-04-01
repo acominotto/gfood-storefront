@@ -53,6 +53,7 @@ export async function forwardWooStoreApiRequest(request: Request, pathSegments: 
   }
 
   const response = await fetch(upstream, init);
-  await persistWooSessionHeaders(response.headers);
+  const persistCartToken = !(pathSegments[0] === "checkout" && method === "GET");
+  await persistWooSessionHeaders(response.headers, { persistCartToken });
   return response;
 }

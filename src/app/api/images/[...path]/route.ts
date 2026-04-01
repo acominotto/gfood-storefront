@@ -13,7 +13,10 @@ type CachedImage = {
 };
 
 const imageCache = new Map<string, CachedImage>();
-const IMAGE_PIPELINE_VERSION = "6";
+const IMAGE_PIPELINE_VERSION = "7";
+
+/** ML background removal needs too much RAM for Vercel serverless; keep false until we offload it. */
+const REMOVE_BACKGROUND_ENABLED = false;
 
 function bytesToArrayBuffer(bytes: Uint8Array) {
   const start = bytes.byteOffset;
@@ -187,7 +190,8 @@ export async function GET(request: Request, { params }: Params) {
   );
   const quality = Number(url.searchParams.get("q") ?? env.IMAGE_PROXY_QUALITY_DEFAULT);
   const fit = url.searchParams.get("fit") === "contain" ? "contain" : "cover";
-  const removeBg = url.searchParams.get("bg") === "remove";
+  const removeBg =
+    REMOVE_BACKGROUND_ENABLED && url.searchParams.get("bg") === "remove";
   let format = chooseFormat(request, url.searchParams.get("format"));
   if (removeBg && (format === "jpeg" || format === "jpg")) {
     format = "webp";

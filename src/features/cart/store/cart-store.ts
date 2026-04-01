@@ -6,9 +6,10 @@ import {
   type CheckoutPayload,
   postCheckout,
   removeCartItem as removeCartItemRequest,
+  selectShippingRate as selectShippingRateRequest,
   setCartItemQuantity as setCartItemQuantityRequest,
 } from "@/features/catalog/api";
-import type { CartResponse } from "@/server/schemas/cart";
+import type { CartResponse, CheckoutOrderResult } from "@/server/schemas/cart";
 import { create } from "zustand";
 
 type CartStatus = "idle" | "loading" | "ready" | "error";
@@ -31,7 +32,8 @@ type CartStoreActions = {
   addItem: (productId: number) => Promise<void>;
   updateItemQuantity: (key: string, quantity: number, productId?: number) => Promise<void>;
   removeItem: (key: string, productId?: number) => Promise<void>;
-  submitCheckout: (payload: CheckoutPayload) => Promise<unknown>;
+  selectShippingRate: (packageId: number, rateId: string) => Promise<void>;
+  submitCheckout: (payload: CheckoutPayload) => Promise<CheckoutOrderResult>;
 };
 
 export type CartStore = CartStoreState & CartStoreActions;
@@ -134,10 +136,28 @@ export const useCartStore = create<CartStore>((set, get) => ({
     }
   },
 
+  selectShippingRate: async (packageId, rateId) => {
+    await get().ensureCartLoaded();
+    set({ error: null });
+    try {
+      const cart = await selectShippingRateRequest(packageId, rateId);
+      set({ cart, status: "ready", error: null });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      throw e;
+    }
+  },
+
   submitCheckout: async (payload) => {
     set({ checkoutError: null, error: null });
     try {
       const result = await postCheckout(payload);
+      const redirect = result.payment_result?.redirect_url;
+      if (typeof window !== "undefined" && redirect) {
+        window.location.assign(redirect);
+        return result;
+      }
+      await get().fetchCart();
       return result;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";
