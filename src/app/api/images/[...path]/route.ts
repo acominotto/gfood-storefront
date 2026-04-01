@@ -211,6 +211,7 @@ export async function GET(request: Request, { params }: Params) {
           ETag: cached.etag,
           "Cache-Control": `public, max-age=${env.IMAGE_PROXY_CACHE_TTL}, stale-while-revalidate=${env.IMAGE_PROXY_CACHE_TTL}`,
           Vary: "Accept",
+          "X-Gashi-Image-Pipeline": IMAGE_PIPELINE_VERSION,
         },
       });
     }
@@ -220,6 +221,7 @@ export async function GET(request: Request, { params }: Params) {
         ETag: cached.etag,
         "Cache-Control": `public, max-age=${env.IMAGE_PROXY_CACHE_TTL}, stale-while-revalidate=${env.IMAGE_PROXY_CACHE_TTL}`,
         Vary: "Accept",
+        "X-Gashi-Image-Pipeline": IMAGE_PIPELINE_VERSION,
       },
     });
   }
@@ -302,6 +304,7 @@ export async function GET(request: Request, { params }: Params) {
       ETag: etag,
       "Cache-Control": `public, max-age=${env.IMAGE_PROXY_CACHE_TTL}, stale-while-revalidate=${env.IMAGE_PROXY_CACHE_TTL}`,
       Vary: "Accept",
+      "X-Gashi-Image-Pipeline": IMAGE_PIPELINE_VERSION,
     },
   });
 }

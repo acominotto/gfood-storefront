@@ -27,6 +27,7 @@
   "catalog": {
     "title": "Produkte",
     "searchPlaceholder": "Produkte suchen",
+    "searching": "Suche läuft…",
     "allCategories": "Alle",
     "addToCart": "Hinzufügen",
     "removeFromCart": "Aus Warenkorb entfernen",

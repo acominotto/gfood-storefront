@@ -4,7 +4,7 @@ import { useNavbarStore } from "@/stores/navbar-store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-const DEBOUNCE_MS = 320;
+const DEBOUNCE_MS = 500;
 
 /**
  * Writes the navbar catalog search string to the `search` query param (debounced).

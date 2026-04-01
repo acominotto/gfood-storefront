@@ -3,6 +3,16 @@
 import { getFacets, getProducts, type ProductResponse } from "@/features/catalog/api";
 import { create } from "zustand";
 
+/** Same list identity except `search` — used to keep stale rows visible while a new search loads. */
+function catalogListBaseKey(signature: string): string {
+  const p = new URLSearchParams(signature);
+  p.delete("search");
+  return [...p.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+}
+
 export type FacetsResponse = Awaited<ReturnType<typeof getFacets>>;
 
 type LoadStatus = "idle" | "loading" | "error";
@@ -58,9 +68,15 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       return;
     }
 
+    const prevSig = state.querySignature;
+    const preservePages =
+      prevSig != null &&
+      state.pages.length > 0 &&
+      catalogListBaseKey(prevSig) === catalogListBaseKey(signature);
+
     set({
       querySignature: signature,
-      pages: [],
+      pages: preservePages ? state.pages : [],
       status: "loading",
       error: null,
       isFetchingNextPage: false,
@@ -81,7 +97,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       set({
         status: "error",
         error: e instanceof Error ? e.message : "Unknown error",
-        pages: [],
+        pages: preservePages ? get().pages : [],
       });
     }
   },
