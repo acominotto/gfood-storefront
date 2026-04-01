@@ -1,4 +1,3 @@
-import sharp from "sharp";
 import { env } from "@/lib/env";
 import { checkRateLimit } from "@/server/rate-limit";
 import { jsonError } from "@/server/api-response";
@@ -13,10 +12,29 @@ type CachedImage = {
 };
 
 const imageCache = new Map<string, CachedImage>();
-const IMAGE_PIPELINE_VERSION = "7";
+const IMAGE_PIPELINE_VERSION = "8";
 
-/** ML background removal needs too much RAM for Vercel serverless; keep false until we offload it. */
-const REMOVE_BACKGROUND_ENABLED = false;
+type SharpFactory = typeof import("sharp");
+
+let sharpSingleton: SharpFactory | undefined;
+
+async function getSharp(): Promise<SharpFactory> {
+  if (!sharpSingleton) {
+    const mod = await import("sharp");
+    sharpSingleton = mod.default;
+  }
+  return sharpSingleton;
+}
+
+/**
+ * Non-literal `import()` so Turbopack/NFT does not trace `@imgly/background-removal-node` when
+ * `IMAGE_PROXY_REMOVE_BG` is off at build time. When the feature is on, `next.config` adds imgly
+ * + onnx paths via `outputFileTracingIncludes`.
+ */
+async function importBackgroundRemovalNode(): Promise<typeof import("@imgly/background-removal-node")> {
+  const pkg = ["@imgly/background-removal-", "node"].join("");
+  return import(pkg);
+}
 
 function bytesToArrayBuffer(bytes: Uint8Array) {
   const start = bytes.byteOffset;
@@ -39,6 +57,7 @@ function chooseFormat(request: Request, explicitFormat: string | null) {
 }
 
 async function removeDarkBorderBackground(buffer: Buffer) {
+  const sharp = await getSharp();
   const { data, info } = await sharp(buffer)
     .ensureAlpha()
     .raw()
@@ -137,6 +156,7 @@ async function removeDarkBorderBackground(buffer: Buffer) {
 }
 
 async function clampLowAlphaToTransparent(buffer: Buffer, threshold = 32) {
+  const sharp = await getSharp();
   const { data, info } = await sharp(buffer)
     .ensureAlpha()
     .raw()
@@ -191,7 +211,7 @@ export async function GET(request: Request, { params }: Params) {
   const quality = Number(url.searchParams.get("q") ?? env.IMAGE_PROXY_QUALITY_DEFAULT);
   const fit = url.searchParams.get("fit") === "contain" ? "contain" : "cover";
   const removeBg =
-    REMOVE_BACKGROUND_ENABLED && url.searchParams.get("bg") === "remove";
+    env.IMAGE_PROXY_REMOVE_BG && url.searchParams.get("bg") === "remove";
   let format = chooseFormat(request, url.searchParams.get("format"));
   if (removeBg && (format === "jpeg" || format === "jpg")) {
     format = "webp";
@@ -249,7 +269,7 @@ export async function GET(request: Request, { params }: Params) {
       // Load only when needed: @imgly/background-removal-node pulls in onnxruntime-node (native
       // .node/.dll/.so). A static import would initialize that for every image request and can
       // break the whole route on serverless (e.g. Vercel) when the runtime binary fails to load.
-      const { removeBackground } = await import("@imgly/background-removal-node");
+      const { removeBackground } = await importBackgroundRemovalNode();
       // The background-removal library relies on Blob MIME type detection.
       // Passing a raw Buffer causes format detection to fail and returns the original image.
       const result = await removeBackground(new Blob([buffer], { type: upstreamContentType }), {
@@ -271,6 +291,7 @@ export async function GET(request: Request, { params }: Params) {
       sourceBuffer = buffer;
     }
   }
+  const sharp = await getSharp();
   let transformed: Buffer;
   let contentType = "image/webp";
 

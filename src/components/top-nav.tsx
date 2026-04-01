@@ -1,56 +1,19 @@
 "use client";
 
+import { CatalogSearchCombobox } from "@/components/catalog-search-combobox";
 import { NavAccountMenu } from "@/components/nav-account-menu";
 import { NavCartButton } from "@/components/nav-cart-button";
 import { NavDeliveryDialog } from "@/components/nav-delivery-dialog";
-import { useNavbarStore } from "@/stores/navbar-store";
 import { usePathname } from "@/i18n/navigation";
 
-import { Flex, HStack, Image, Input, InputGroup, Stack, Text } from "@chakra-ui/react";
+import { Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
-import { LuSearch } from "react-icons/lu";
 import { Link } from "./ui/link";
-
-function CatalogSearchField({
-  catalogSearch,
-  onChange,
-  placeholder,
-  width,
-}: {
-  catalogSearch: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  width?: string;
-}) {
-  return (
-    <InputGroup
-      w={width ?? "full"}
-      borderRadius="full"
-      startElement={<LuSearch aria-hidden size={18} />}
-      startElementProps={{ pointerEvents: "none" }}
-    >
-      <Input
-        size="sm"
-        placeholder={placeholder}
-        value={catalogSearch}
-        onChange={(e) => onChange(e.target.value)}
-        bg="white"
-        borderColor="gray.200"
-        borderRadius="full"
-        textAlign="right"
-        aria-label={placeholder}
-      />
-    </InputGroup>
-  );
-}
 
 export function TopNav() {
   const t = useTranslations();
-  const tCatalog = useTranslations("catalog");
   const pathname = usePathname();
   const isCatalogHome = pathname === "/";
-  const catalogSearch = useNavbarStore((s) => s.catalogSearch);
-  const setCatalogSearch = useNavbarStore((s) => s.setCatalogSearch);
 
   return (
     <Stack
@@ -99,11 +62,7 @@ export function TopNav() {
             minW={0}
             px={2}
           >
-            <CatalogSearchField
-              catalogSearch={catalogSearch}
-              onChange={setCatalogSearch}
-              placeholder={tCatalog("searchPlaceholder")}
-            />
+            <CatalogSearchCombobox />
           </Flex>
         ) : null}
 
@@ -129,12 +88,7 @@ export function TopNav() {
 
       {isCatalogHome ? (
         <Flex display={{ base: "flex", md: "none" }} w="full" minW={0}>
-          <CatalogSearchField
-            catalogSearch={catalogSearch}
-            onChange={setCatalogSearch}
-            placeholder={tCatalog("searchPlaceholder")}
-            width="full"
-          />
+          <CatalogSearchCombobox width="full" />
         </Flex>
       ) : null}
     </Stack>

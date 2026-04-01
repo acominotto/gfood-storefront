@@ -187,6 +187,8 @@ export function CheckoutPage() {
   const [bootstrapDone, setBootstrapDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderResult, setOrderResult] = useState<CheckoutOrderResult | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState<string | null>(null);
 
   const cart = useCartStore((s) => s.cart);
   const status = useCartStore((s) => s.status);
@@ -194,14 +196,31 @@ export function CheckoutPage() {
   const ensureCartLoaded = useCartStore((s) => s.ensureCartLoaded);
   const fetchCart = useCartStore((s) => s.fetchCart);
   const selectShippingRate = useCartStore((s) => s.selectShippingRate);
+  const applyCoupon = useCartStore((s) => s.applyCoupon);
+  const removeCoupon = useCartStore((s) => s.removeCoupon);
   const submitCheckout = useCartStore((s) => s.submitCheckout);
   const checkoutError = useCartStore((s) => s.checkoutError);
 
   const paymentInitRef = useRef(false);
 
+  const applyPromo = useCallback(async () => {
+    const code = promoCode.trim();
+    if (!code) {
+      return;
+    }
+    setPromoError(null);
+    try {
+      await applyCoupon(code);
+      setPromoCode("");
+    } catch (e) {
+      setPromoError(e instanceof Error ? e.message : t("promoUnknown"));
+    }
+  }, [applyCoupon, promoCode, t]);
+
   const loadBootstrap = useCallback(async () => {
     await ensureCartLoaded();
     await fetchCart();
+    const cartAfterInitialFetch = useCartStore.getState().cart;
     try {
       const draft = await getCheckout();
       setBilling((b) => mergeStoreAddress(b, draft.billing_address));
@@ -217,7 +236,13 @@ export function CheckoutPage() {
       /* no draft / guest — rely on cart addresses below */
     }
     await fetchCart();
-    const latest = useCartStore.getState().cart;
+    const hadItems = getCartItemsCount(cartAfterInitialFetch) > 0;
+    let latest = useCartStore.getState().cart;
+    if (hadItems && getCartItemsCount(latest) === 0 && cartAfterInitialFetch) {
+      /* Woo/Store API can briefly report an empty cart after draft checkout sync; line items are still on the session (see add-to-cart restoring them). */
+      useCartStore.setState({ cart: cartAfterInitialFetch, status: "ready", error: null });
+      latest = cartAfterInitialFetch;
+    }
     if (latest?.billing_address) {
       setBilling((b) => mergeStoreAddress(b, latest.billing_address));
     }
@@ -564,6 +589,55 @@ export function CheckoutPage() {
           ))}
           {(cart?.items?.length ?? 0) > 0 ? (
             <>
+              <Stack gap={3} py={3} borderBottomWidth="1px" borderColor="gray.100">
+                <Text fontSize="sm" fontWeight="semibold">
+                  {t("promoCode")}
+                </Text>
+                {(cart?.coupons ?? []).map((c) => (
+                  <HStack key={c.code} justify="space-between" gap={2} align="center">
+                    <Text fontSize="sm">{c.code}</Text>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={async () => {
+                        setPromoError(null);
+                        try {
+                          await removeCoupon(c.code);
+                        } catch (e) {
+                          setPromoError(e instanceof Error ? e.message : t("promoUnknown"));
+                        }
+                      }}
+                    >
+                      {t("promoRemove")}
+                    </Button>
+                  </HStack>
+                ))}
+                <HStack gap={2} align="flex-end">
+                  <Input
+                    flex={1}
+                    placeholder={t("promoPlaceholder")}
+                    value={promoCode}
+                    onChange={(e) => {
+                      setPromoCode(e.target.value);
+                      setPromoError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void applyPromo();
+                      }
+                    }}
+                  />
+                  <Button loadingText={t("promoApplying")} onClick={() => void applyPromo()}>
+                    {t("promoApply")}
+                  </Button>
+                </HStack>
+                {promoError ? (
+                  <Text fontSize="sm" color="red.600">
+                    {promoError}
+                  </Text>
+                ) : null}
+              </Stack>
               <CartDeliveryLine
                 label={tNav("delivery")}
                 amountMinor={cart?.totals?.total_shipping}

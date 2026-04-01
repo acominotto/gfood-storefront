@@ -106,4 +106,5 @@ export const ComboboxItemGroup = React.forwardRef<
 export const ComboboxLabel = ChakraCombobox.Label
 export const ComboboxInput = ChakraCombobox.Input
 export const ComboboxEmpty = ChakraCombobox.Empty
+export const ComboboxList = ChakraCombobox.List
 export const ComboboxItemText = ChakraCombobox.ItemText

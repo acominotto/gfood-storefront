@@ -92,10 +92,22 @@ export const shippingPackageSchema = z
 
 export type ShippingPackage = z.infer<typeof shippingPackageSchema>;
 
+/** Applied cart coupon from WooCommerce Store API (`coupons` on cart or `/cart/coupons`). */
+export const cartCouponSchema = z
+  .object({
+    code: z.string(),
+    type: z.string().optional(),
+    totals: z.object({}).passthrough().optional(),
+  })
+  .passthrough();
+
+export type CartCoupon = z.infer<typeof cartCouponSchema>;
+
 export const cartResponseSchema = z
   .object({
     items: z.array(cartItemSchema).default([]),
     fees: z.array(cartFeeSchema).default([]),
+    coupons: z.preprocess((v) => (Array.isArray(v) ? v : []), z.array(cartCouponSchema)),
     items_count: z.coerce.number().optional(),
     totals: cartTotalsSchema,
     payment_methods: z.array(z.string()).default([]),

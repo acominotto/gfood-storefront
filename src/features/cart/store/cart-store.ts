@@ -2,9 +2,11 @@
 
 import {
   addToCart as addToCartRequest,
+  applyCartCoupon as applyCartCouponRequest,
   getCart,
   type CheckoutPayload,
   postCheckout,
+  removeCartCoupon as removeCartCouponRequest,
   removeCartItem as removeCartItemRequest,
   selectShippingRate as selectShippingRateRequest,
   setCartItemQuantity as setCartItemQuantityRequest,
@@ -33,6 +35,8 @@ type CartStoreActions = {
   updateItemQuantity: (key: string, quantity: number, productId?: number) => Promise<void>;
   removeItem: (key: string, productId?: number) => Promise<void>;
   selectShippingRate: (packageId: number, rateId: string) => Promise<void>;
+  applyCoupon: (code: string) => Promise<void>;
+  removeCoupon: (code: string) => Promise<void>;
   submitCheckout: (payload: CheckoutPayload) => Promise<CheckoutOrderResult>;
 };
 
@@ -44,10 +48,14 @@ export function getCartItemsCount(cart: CartResponse | null): number {
   if (!cart) {
     return 0;
   }
+  const fromLines = cart.items.reduce((total, item) => total + item.quantity, 0);
+  if (cart.items.length > 0) {
+    return fromLines;
+  }
   if (typeof cart.items_count === "number") {
     return cart.items_count;
   }
-  return cart.items.reduce((total, item) => total + item.quantity, 0);
+  return fromLines;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -141,6 +149,30 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({ error: null });
     try {
       const cart = await selectShippingRateRequest(packageId, rateId);
+      set({ cart, status: "ready", error: null });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      throw e;
+    }
+  },
+
+  applyCoupon: async (code) => {
+    await get().ensureCartLoaded();
+    set({ error: null });
+    try {
+      const cart = await applyCartCouponRequest(code);
+      set({ cart, status: "ready", error: null });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      throw e;
+    }
+  },
+
+  removeCoupon: async (code) => {
+    await get().ensureCartLoaded();
+    set({ error: null });
+    try {
+      const cart = await removeCartCouponRequest(code);
       set({ cart, status: "ready", error: null });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : "Unknown error" });

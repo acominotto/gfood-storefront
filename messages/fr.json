@@ -29,7 +29,10 @@
   "catalog": {
     "title": "Nos produits",
     "searchPlaceholder": "Rechercher un produit",
+    "runSearch": "Rechercher",
     "searching": "Recherche en cours…",
+    "suggestProducts": "Produits",
+    "suggestCategories": "Catégories",
     "allCategories": "Tout",
     "addToCart": "Ajouter",
     "removeFromCart": "Retirer du panier",
@@ -68,7 +71,13 @@
     "postcode": "Code postal",
     "country": "Code pays",
     "email": "E-mail",
-    "phone": "Téléphone"
+    "phone": "Téléphone",
+    "promoCode": "Code promo",
+    "promoPlaceholder": "Saisir le code",
+    "promoApply": "Appliquer",
+    "promoRemove": "Retirer",
+    "promoApplying": "Application…",
+    "promoUnknown": "Une erreur s’est produite"
   },
   "delivery": {
     "title": "Livraison",

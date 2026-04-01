@@ -11,6 +11,10 @@ import {
   type PutCheckoutPayload,
 } from "@/server/schemas/cart";
 import { facetsResponseSchema, productListSchema } from "@/server/schemas/catalog";
+import {
+  catalogSuggestResponseSchema,
+  type CatalogSuggestResponse,
+} from "@/server/schemas/catalog-suggest";
 import { z } from "zod";
 
 const productsResponseSchema = z.object({
@@ -26,6 +30,22 @@ const productsResponseSchema = z.object({
 export type ProductResponse = z.infer<typeof productsResponseSchema>;
 
 export type { CheckoutPayload };
+export type { CatalogSuggestItem } from "@/server/schemas/catalog-suggest";
+
+export async function getCatalogSuggest(
+  q: string,
+  options?: { signal?: AbortSignal },
+): Promise<CatalogSuggestResponse> {
+  const trimmed = q.trim();
+  if (trimmed.length === 0) {
+    return { items: [] };
+  }
+  const params = new URLSearchParams({ q: trimmed });
+  const response = await apiClient.get(`catalog/suggest?${params.toString()}`, {
+    signal: options?.signal,
+  });
+  return catalogSuggestResponseSchema.parse(await response.json());
+}
 
 async function parseWooJson<T>(responsePromise: Promise<Response>, schema: z.ZodType<T>): Promise<T> {
   try {
@@ -109,6 +129,28 @@ export async function selectShippingRate(packageId: number, rateId: string) {
     }),
     cartResponseSchema,
   );
+}
+
+/** `POST /wc/store/v1/cart/coupons?code=` — then refresh cart for totals. */
+export async function applyCartCoupon(code: string) {
+  const trimmed = code.trim();
+  try {
+    await apiClient.post(`woo/cart/coupons?code=${encodeURIComponent(trimmed)}`, { json: {} });
+  } catch (e) {
+    throw new Error(await formatWooHttpError(e));
+  }
+  return parseWooJson(apiClient.get("woo/cart"), cartResponseSchema);
+}
+
+/** `DELETE /wc/store/v1/cart/coupons/{code}` — then refresh cart. */
+export async function removeCartCoupon(code: string) {
+  const trimmed = code.trim();
+  try {
+    await apiClient.delete(`woo/cart/coupons/${encodeURIComponent(trimmed)}`);
+  } catch (e) {
+    throw new Error(await formatWooHttpError(e));
+  }
+  return parseWooJson(apiClient.get("woo/cart"), cartResponseSchema);
 }
 
 export async function postCheckout(body: CheckoutPayload) {

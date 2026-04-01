@@ -1,7 +1,8 @@
 import { env } from "@/lib/env";
 import { getWooSessionHeaders, persistWooSessionHeaders } from "@/server/woo-client";
 
-const SEGMENT_RE = /^[a-zA-Z0-9._-]+$/;
+/** Allow `%` for percent-encoded coupon codes in paths like `cart/coupons/{code}`. */
+const SEGMENT_RE = /^[a-zA-Z0-9._%-]+$/;
 
 export function buildWooStoreUpstreamUrl(request: Request, pathSegments: string[]) {
   if (pathSegments.length === 0) {
@@ -39,6 +40,8 @@ export async function forwardWooStoreApiRequest(request: Request, pathSegments: 
     method,
     headers,
     signal: AbortSignal.timeout(env.UPSTREAM_TIMEOUT_MS),
+    /** Cart/checkout are per-session; never cache or dedupe upstream GETs in Next's fetch layer. */
+    cache: "no-store",
   };
 
   if (method !== "GET" && method !== "HEAD") {

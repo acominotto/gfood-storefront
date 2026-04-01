@@ -22,6 +22,11 @@ const envSchema = z.object({
   IMAGE_PROXY_THUMB_WIDTH: z.coerce.number().int().positive().default(500),
   IMAGE_PROXY_THUMB_HEIGHT: z.coerce.number().int().positive().default(500),
   IMAGE_PROXY_QUALITY_DEFAULT: z.coerce.number().int().min(20).max(95).default(75),
+  /** When false (default), ML deps are omitted from the Vercel serverless bundle; set IMAGE_PROXY_REMOVE_BG=true at build and runtime to enable. */
+  IMAGE_PROXY_REMOVE_BG: z
+    .string()
+    .optional()
+    .transform((s) => s === "true"),
   UPSTREAM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
 });
@@ -48,6 +53,7 @@ const parsed = envSchema.safeParse({
   IMAGE_PROXY_THUMB_WIDTH: process.env.IMAGE_PROXY_THUMB_WIDTH,
   IMAGE_PROXY_THUMB_HEIGHT: process.env.IMAGE_PROXY_THUMB_HEIGHT,
   IMAGE_PROXY_QUALITY_DEFAULT: process.env.IMAGE_PROXY_QUALITY_DEFAULT,
+  IMAGE_PROXY_REMOVE_BG: process.env.IMAGE_PROXY_REMOVE_BG,
   UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
   RATE_LIMIT_PER_MINUTE: process.env.RATE_LIMIT_PER_MINUTE,
 });

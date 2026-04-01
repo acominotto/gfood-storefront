@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import { imglyBackgroundRemovalMediumChunkNames } from "./src/lib/imgly-medium-model-assets";
-import { imglyBackgroundRemovalSmallChunkNames } from "./src/lib/imgly-small-model-assets";
+
+/** Must match runtime `IMAGE_PROXY_REMOVE_BG`; when false, onnx/imgly are traced out of `/api/images` to stay under Vercel’s bundle limit. */
+const imageProxyRemoveBg = process.env.IMAGE_PROXY_REMOVE_BG === "true";
 
 const imglyDist = "./node_modules/@imgly/background-removal-node/dist";
 
@@ -23,37 +25,49 @@ const sharpTraceExcludesNonLinuxX64 = [
   "./node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
 ] as const;
 
+const imageRouteTracingExcludes = [
+  "./node_modules/onnxruntime-node/bin/napi-v3/darwin/**/*",
+  "./node_modules/onnxruntime-node/bin/napi-v3/win32/**/*",
+  "./node_modules/onnxruntime-node/bin/napi-v3/linux/arm64/**/*",
+  "./node_modules/@img/sharp-darwin-arm64/**/*",
+  "./node_modules/@img/sharp-darwin-x64/**/*",
+  "./node_modules/@img/sharp-libvips-darwin-arm64/**/*",
+  "./node_modules/@img/sharp-libvips-darwin-x64/**/*",
+  "./node_modules/@img/sharp-wasm32/**/*",
+  "./node_modules/@img/sharp-win32-*/**/*",
+  "./node_modules/@img/sharp-libvips-win32-*/**/*",
+  ...sharpTraceExcludesNonLinuxX64,
+  "./node_modules/sharp/vendor/**/include/**/*",
+  ...imglyBackgroundRemovalMediumChunkNames.map((name) => `${imglyDist}/${name}`),
+  ...(imageProxyRemoveBg
+    ? []
+    : ([
+        "./node_modules/@imgly/background-removal-node/**/*",
+        "./node_modules/onnxruntime-node/**/*",
+      ] as const)),
+] as const;
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   // Keep native addons out of the Turbopack bundle so `onnxruntime-node` loads
   // `libonnxruntime.so.*` from `node_modules/onnxruntime-node/bin/...` (Vercel
   // otherwise traced only the `.node` file and failed at runtime).
+  // Always externalize native ML packages so webpack never bundles them; when
+  // `IMAGE_PROXY_REMOVE_BG` is unset/false, outputFileTracingExcludes drops them from the lambda.
   serverExternalPackages: ["onnxruntime-node", "@imgly/background-removal-node"],
-  // Linux x64 ORT + small model chunks only (below 250 MB unzipped on Vercel). Requires pnpm
-  // `node-linker=hoisted` in .npmrc so paths are not duplicated under .pnpm/*.
-  outputFileTracingIncludes: {
-    "/app/api/images/**/*": [
-      "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
-      `${imglyDist}/resources.json`,
-      ...imglyBackgroundRemovalSmallChunkNames.map((name) => `${imglyDist}/${name}`),
-    ],
-  },
+  // Linux x64 ORT + small model chunks only when ML removal is on; otherwise the route
+  // stays sharp-only and fits Vercel limits. Requires pnpm `node-linker=hoisted`.
+  outputFileTracingIncludes: imageProxyRemoveBg
+    ? {
+        "/app/api/images/**/*": [
+          "./node_modules/onnxruntime-node/bin/napi-v3/linux/x64/**/*",
+          // Full package (opaque dynamic import is not traced); medium chunks are stripped via excludes.
+          "./node_modules/@imgly/background-removal-node/**/*",
+        ],
+      }
+    : {},
   outputFileTracingExcludes: {
-    "/app/api/images/**/*": [
-      "./node_modules/onnxruntime-node/bin/napi-v3/darwin/**/*",
-      "./node_modules/onnxruntime-node/bin/napi-v3/win32/**/*",
-      "./node_modules/onnxruntime-node/bin/napi-v3/linux/arm64/**/*",
-      "./node_modules/@img/sharp-darwin-arm64/**/*",
-      "./node_modules/@img/sharp-darwin-x64/**/*",
-      "./node_modules/@img/sharp-libvips-darwin-arm64/**/*",
-      "./node_modules/@img/sharp-libvips-darwin-x64/**/*",
-      "./node_modules/@img/sharp-wasm32/**/*",
-      "./node_modules/@img/sharp-win32-*/**/*",
-      "./node_modules/@img/sharp-libvips-win32-*/**/*",
-      ...sharpTraceExcludesNonLinuxX64,
-      "./node_modules/sharp/vendor/**/include/**/*",
-      ...imglyBackgroundRemovalMediumChunkNames.map((name) => `${imglyDist}/${name}`),
-    ],
+    "/app/api/images/**/*": [...imageRouteTracingExcludes],
   },
   images: {
     remotePatterns: [
