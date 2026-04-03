@@ -1,9 +1,10 @@
 "use client";
 
 import { Link } from "@/components/ui/link";
+import { Select } from "@/components/ui/select";
 import { buildAncestorChain, childrenOf, pickPrimaryCategoryId } from "@/lib/category-tree";
 import type { Category, Product } from "@/server/schemas/catalog";
-import { Box, HStack, Portal, Select, Text, createListCollection } from "@chakra-ui/react";
+import { Box, HStack, Text, createListCollection } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -59,7 +60,6 @@ export function ProductCategoryBreadcrumb({ product, categories, locale }: Produ
                   }
                 }}
               >
-                <Select.HiddenSelect />
                 <Select.Control>
                   <Select.Trigger bg="gray.50">
                     <Select.ValueText placeholder={cat.name} />
@@ -68,18 +68,13 @@ export function ProductCategoryBreadcrumb({ product, categories, locale }: Produ
                     <Select.Indicator />
                   </Select.IndicatorGroup>
                 </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content>
-                      {collection.items.map((item) => (
-                        <Select.Item item={item} key={item.value}>
-                          {item.label}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
+                <Select.Content>
+                  {collection.items.map((item) => (
+                    <Select.Item item={item} key={item.value}>
+                      {item.label}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
               </Select.Root>
             </Box>
           </HStack>

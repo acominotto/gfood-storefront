@@ -2,14 +2,8 @@
 
 import { DELIVERY_FREE_THRESHOLD_CHF } from "@/constants/delivery";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  HStack,
-  IconButton,
-  Portal,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Dialog } from "@/components/ui/dialog";
+import { HStack, IconButton, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { FiX } from "react-icons/fi";
 import type { ReactNode } from "react";
@@ -62,14 +56,9 @@ export function DeliveryInfoDialog({ trigger }: DeliveryInfoDialogTriggerProps) 
   return (
     <Dialog.Root size="md">
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <DeliveryDialogPanel />
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
+      <Dialog.Content>
+        <DeliveryDialogPanel />
+      </Dialog.Content>
     </Dialog.Root>
   );
 }
@@ -83,14 +72,9 @@ type DeliveryInfoDialogControlledProps = {
 export function DeliveryInfoDialogControlled({ open, onOpenChange }: DeliveryInfoDialogControlledProps) {
   return (
     <Dialog.Root size="md" open={open} onOpenChange={(e) => onOpenChange(e.open)}>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <DeliveryDialogPanel />
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
+      <Dialog.Content>
+        <DeliveryDialogPanel />
+      </Dialog.Content>
     </Dialog.Root>
   );
 }

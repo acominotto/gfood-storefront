@@ -1,7 +1,7 @@
-import { Breadcrumb, type SystemStyleObject } from "@chakra-ui/react"
+import { Breadcrumb as ChakraBreadcrumb, type SystemStyleObject } from "@chakra-ui/react"
 import * as React from "react"
 
-export interface BreadcrumbRootProps extends Breadcrumb.RootProps {
+export interface BreadcrumbRootProps extends ChakraBreadcrumb.RootProps {
   separator?: React.ReactNode
   separatorGap?: SystemStyleObject["gap"]
 }
@@ -17,24 +17,31 @@ export const BreadcrumbRoot = React.forwardRef<
   )
 
   return (
-    <Breadcrumb.Root ref={ref} {...rest}>
-      <Breadcrumb.List gap={separatorGap}>
+    <ChakraBreadcrumb.Root ref={ref} {...rest}>
+      <ChakraBreadcrumb.List gap={separatorGap}>
         {validChildren.map((child, index) => {
           const last = index === validChildren.length - 1
           return (
             <React.Fragment key={index}>
-              <Breadcrumb.Item>{child}</Breadcrumb.Item>
+              <ChakraBreadcrumb.Item>{child}</ChakraBreadcrumb.Item>
               {!last && (
-                <Breadcrumb.Separator>{separator}</Breadcrumb.Separator>
+                <ChakraBreadcrumb.Separator>{separator}</ChakraBreadcrumb.Separator>
               )}
             </React.Fragment>
           )
         })}
-      </Breadcrumb.List>
-    </Breadcrumb.Root>
+      </ChakraBreadcrumb.List>
+    </ChakraBreadcrumb.Root>
   )
 })
 
-export const BreadcrumbLink = Breadcrumb.Link
-export const BreadcrumbCurrentLink = Breadcrumb.CurrentLink
-export const BreadcrumbEllipsis = Breadcrumb.Ellipsis
+export const BreadcrumbLink = ChakraBreadcrumb.Link
+export const BreadcrumbCurrentLink = ChakraBreadcrumb.CurrentLink
+export const BreadcrumbEllipsis = ChakraBreadcrumb.Ellipsis
+
+export const Breadcrumb = {
+  Root: BreadcrumbRoot,
+  Link: BreadcrumbLink,
+  CurrentLink: BreadcrumbCurrentLink,
+  Ellipsis: BreadcrumbEllipsis,
+} as const

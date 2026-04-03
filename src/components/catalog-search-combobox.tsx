@@ -1,22 +1,10 @@
 "use client";
 
 import { CatalogSearchBar } from "@/components/catalog-search-bar";
-import {
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxList,
-  ComboboxRoot,
-} from "@/components/ui/combobox";
+import { Combobox } from "@/components/ui/combobox";
 import { getCatalogSuggest, type CatalogSuggestItem } from "@/features/catalog/api";
 import { useNavbarStore } from "@/stores/navbar-store";
-import {
-  Box,
-  ComboboxItem,
-  ComboboxItemGroup,
-  ComboboxItemGroupLabel,
-  ComboboxItemText,
-  createListCollection,
-} from "@chakra-ui/react";
+import { Box, createListCollection } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -139,7 +127,7 @@ export function CatalogSearchCombobox({ width }: CatalogSearchComboboxProps) {
   }
 
   return (
-    <ComboboxRoot
+    <Combobox.Root
       collection={collection}
       w={width ?? "full"}
       inputValue={draftQuery}
@@ -161,36 +149,36 @@ export function CatalogSearchCombobox({ width }: CatalogSearchComboboxProps) {
         onSubmit={onSubmitSearch}
       />
 
-      <ComboboxContent maxH="min(70vh, 22rem)" overflowY="auto" zIndex={1100} py={1}>
+      <Combobox.Content maxH="min(70vh, 22rem)" overflowY="auto" zIndex={1100} py={1}>
         {suggestLoading ? (
-          <ComboboxEmpty py={3} px={3} color="fg.muted">
+          <Combobox.Empty py={3} px={3} color="fg.muted">
             {tCatalog("searching")}
-          </ComboboxEmpty>
+          </Combobox.Empty>
         ) : null}
         {!suggestLoading && draftQuery.trim().length > 0 && suggestItems.length === 0 ? (
-          <ComboboxEmpty py={3} px={3} color="fg.muted">
+          <Combobox.Empty py={3} px={3} color="fg.muted">
             {tCatalog("noResults")}
-          </ComboboxEmpty>
+          </Combobox.Empty>
         ) : null}
         {!suggestLoading && suggestItems.length > 0 ? (
-          <ComboboxList>
+          <Combobox.List>
             {groups.map(([key, groupItems]) => (
-              <ComboboxItemGroup key={key} id={key}>
-                <ComboboxItemGroupLabel px={3} py={1} fontSize="xs" color="fg.muted">
+              <Combobox.ItemGroup key={key} id={key}>
+                <Combobox.ItemGroupLabel px={3} py={1} fontSize="xs" color="fg.muted">
                   {key === "product" ? tCatalog("suggestProducts") : tCatalog("suggestCategories")}
-                </ComboboxItemGroupLabel>
+                </Combobox.ItemGroupLabel>
                 {groupItems.map((item) => (
-                  <ComboboxItem key={`${item.kind}:${item.id}`} item={item} py={2} px={3}>
-                    <ComboboxItemText>
+                  <Combobox.Item key={`${item.kind}:${item.id}`} item={item} py={2} px={3}>
+                    <Combobox.ItemText>
                       <MatchHighlight text={item.label} query={draftQuery} />
-                    </ComboboxItemText>
-                  </ComboboxItem>
+                    </Combobox.ItemText>
+                  </Combobox.Item>
                 ))}
-              </ComboboxItemGroup>
+              </Combobox.ItemGroup>
             ))}
-          </ComboboxList>
+          </Combobox.List>
         ) : null}
-      </ComboboxContent>
-    </ComboboxRoot>
+      </Combobox.Content>
+    </Combobox.Root>
   );
 }

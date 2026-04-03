@@ -122,14 +122,15 @@ export const SelectRoot = React.forwardRef<
   )
 }) as ChakraSelect.RootComponent
 
-interface SelectItemGroupProps extends ChakraSelect.ItemGroupProps {
+interface SelectLabeledItemGroupProps extends ChakraSelect.ItemGroupProps {
   label: React.ReactNode
 }
 
-export const SelectItemGroup = React.forwardRef<
+/** Renders {@link ChakraSelect.ItemGroupLabel} from a `label` prop. For Chakra-style children, use {@link SelectItemGroup}. */
+export const SelectLabeledItemGroup = React.forwardRef<
   HTMLDivElement,
-  SelectItemGroupProps
->(function SelectItemGroup(props, ref) {
+  SelectLabeledItemGroupProps
+>(function SelectLabeledItemGroup(props, ref) {
   const { children, label, ...rest } = props
   return (
     <ChakraSelect.ItemGroup {...rest} ref={ref}>
@@ -139,5 +140,27 @@ export const SelectItemGroup = React.forwardRef<
   )
 })
 
+export const SelectItemGroup = ChakraSelect.ItemGroup
+export const SelectItemGroupLabel = ChakraSelect.ItemGroupLabel
 export const SelectLabel = ChakraSelect.Label
 export const SelectItemText = ChakraSelect.ItemText
+
+export const Select = {
+  Root: SelectRoot,
+  HiddenSelect: ChakraSelect.HiddenSelect,
+  Control: ChakraSelect.Control,
+  Trigger: ChakraSelect.Trigger,
+  IndicatorGroup: ChakraSelect.IndicatorGroup,
+  Indicator: ChakraSelect.Indicator,
+  ClearTrigger: ChakraSelect.ClearTrigger,
+  /** Control + trigger + indicators + optional clear (see {@link SelectTrigger}). */
+  TriggerControl: SelectTrigger,
+  Content: SelectContent,
+  Item: SelectItem,
+  ItemText: SelectItemText,
+  ValueText: SelectValueText,
+  Label: SelectLabel,
+  ItemGroup: ChakraSelect.ItemGroup,
+  ItemGroupLabel: ChakraSelect.ItemGroupLabel,
+  LabeledItemGroup: SelectLabeledItemGroup,
+} as const

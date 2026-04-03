@@ -45,3 +45,12 @@ export const MenuRoot = ChakraMenu.Root;
 export const MenuTrigger = ChakraMenu.Trigger;
 export const MenuItem = ChakraMenu.Item;
 export const MenuSeparator = ChakraMenu.Separator;
+
+export const Menu = {
+  Root: MenuRoot,
+  Trigger: MenuTrigger,
+  Content: MenuContent,
+  Item: MenuItem,
+  Separator: MenuSeparator,
+  TriggerItem: MenuTriggerItem,
+} as const;

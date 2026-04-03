@@ -86,14 +86,15 @@ export const ComboboxRoot = React.forwardRef<
   )
 }) as ChakraCombobox.RootComponent
 
-interface ComboboxItemGroupProps extends ChakraCombobox.ItemGroupProps {
+interface ComboboxLabeledItemGroupProps extends ChakraCombobox.ItemGroupProps {
   label: React.ReactNode
 }
 
-export const ComboboxItemGroup = React.forwardRef<
+/** Renders {@link ChakraCombobox.ItemGroupLabel} from a `label` prop. For Chakra-style children, use {@link ComboboxItemGroup}. */
+export const ComboboxLabeledItemGroup = React.forwardRef<
   HTMLDivElement,
-  ComboboxItemGroupProps
->(function ComboboxItemGroup(props, ref) {
+  ComboboxLabeledItemGroupProps
+>(function ComboboxLabeledItemGroup(props, ref) {
   const { children, label, ...rest } = props
   return (
     <ChakraCombobox.ItemGroup {...rest} ref={ref}>
@@ -103,8 +104,25 @@ export const ComboboxItemGroup = React.forwardRef<
   )
 })
 
+export const ComboboxItemGroup = ChakraCombobox.ItemGroup
+export const ComboboxItemGroupLabel = ChakraCombobox.ItemGroupLabel
 export const ComboboxLabel = ChakraCombobox.Label
 export const ComboboxInput = ChakraCombobox.Input
 export const ComboboxEmpty = ChakraCombobox.Empty
 export const ComboboxList = ChakraCombobox.List
 export const ComboboxItemText = ChakraCombobox.ItemText
+
+export const Combobox = {
+  Root: ComboboxRoot,
+  Control: ComboboxControl,
+  Content: ComboboxContent,
+  Item: ComboboxItem,
+  Input: ComboboxInput,
+  Label: ComboboxLabel,
+  Empty: ComboboxEmpty,
+  List: ComboboxList,
+  ItemText: ComboboxItemText,
+  ItemGroup: ComboboxItemGroup,
+  ItemGroupLabel: ComboboxItemGroupLabel,
+  LabeledItemGroup: ComboboxLabeledItemGroup,
+} as const

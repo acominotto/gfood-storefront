@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  MenuContent,
-  MenuItem,
-  MenuRoot,
-  MenuTrigger,
-  MenuTriggerItem,
-} from "@/components/ui/menu";
+import { Menu } from "@/components/ui/menu";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -51,7 +45,7 @@ export function NavAccountMenu() {
   useEffect(() => () => clearLangCloseTimer(), []);
 
   return (
-    <MenuRoot
+    <Menu.Root
       positioning={{
         placement: "bottom-end",
         gutter: 2,
@@ -65,13 +59,13 @@ export function NavAccountMenu() {
         }
       }}
     >
-      <MenuTrigger asChild>
+      <Menu.Trigger asChild>
         <Button size="sm" colorPalette="brand" aria-haspopup="menu">
           <FiUser />
           {t("myAccount")}
         </Button>
-      </MenuTrigger>
-      <MenuContent minW="12rem">
+      </Menu.Trigger>
+      <Menu.Content minW="12rem">
         {session?.user?.email ? (
           <Box px={2} py={1.5} borderBottomWidth="1px" borderColor="gray.100">
             <Text fontSize="xs" color="gray.500" lineClamp={1}>
@@ -81,12 +75,12 @@ export function NavAccountMenu() {
         ) : null}
 
         {!session ? (
-          <MenuItem value="login" asChild>
+          <Menu.Item value="login" asChild>
             <Link href="/login">{t("login")}</Link>
-          </MenuItem>
+          </Menu.Item>
         ) : null}
 
-        <MenuRoot
+        <Menu.Root
           open={langMenuOpen}
           onOpenChange={(d) => {
             setLangMenuOpen(d.open);
@@ -99,7 +93,7 @@ export function NavAccountMenu() {
             strategy: "fixed",
           }}
         >
-          <MenuTriggerItem
+          <Menu.TriggerItem
             value="language"
             onPointerEnter={(e) => {
               if (e.pointerType === "mouse") {
@@ -113,8 +107,8 @@ export function NavAccountMenu() {
             }}
           >
             {t("language")}
-          </MenuTriggerItem>
-          <MenuContent
+          </Menu.TriggerItem>
+          <Menu.Content
             minW="11rem"
             onPointerEnter={(e) => {
               if (e.pointerType === "mouse") {
@@ -130,7 +124,7 @@ export function NavAccountMenu() {
             {routing.locales.map((loc) => {
               const meta = LOCALE_NAV_META[loc];
               return (
-                <MenuItem key={loc} value={loc} asChild>
+                <Menu.Item key={loc} value={loc} asChild>
                   <Link href={pathname} locale={loc}>
                     <HStack gap={2} flex="1" py={0.5}>
                       <Image
@@ -149,18 +143,18 @@ export function NavAccountMenu() {
                       {locale === loc ? <LuCheck size={16} /> : <Box w="16px" />}
                     </HStack>
                   </Link>
-                </MenuItem>
+                </Menu.Item>
               );
             })}
-          </MenuContent>
-        </MenuRoot>
+          </Menu.Content>
+        </Menu.Root>
 
         {session ? (
-          <MenuItem value="logout" onClick={() => signOut({ callbackUrl: `/${locale}/login` })}>
+          <Menu.Item value="logout" onClick={() => signOut({ callbackUrl: `/${locale}/login` })}>
             {tAuth("logout")}
-          </MenuItem>
+          </Menu.Item>
         ) : null}
-      </MenuContent>
-    </MenuRoot>
+      </Menu.Content>
+    </Menu.Root>
   );
 }

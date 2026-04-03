@@ -1,7 +1,7 @@
 "use client";
 
-import { ComboboxInput } from "@/components/ui/combobox";
-import { Box, ComboboxControl, Flex, IconButton } from "@chakra-ui/react";
+import { Combobox } from "@/components/ui/combobox";
+import { Box, Flex, IconButton } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 
 export type CatalogSearchBarProps = {
@@ -13,7 +13,7 @@ export type CatalogSearchBarProps = {
 };
 
 /**
- * Rounded search field + circular brand submit control. Lives inside {@link ComboboxRoot} so the input stays wired to the combobox.
+ * Rounded search field + circular brand submit control. Lives inside {@link Combobox.Root} so the input stays wired to the combobox.
  */
 export function CatalogSearchBar({
   width,
@@ -37,8 +37,8 @@ export function CatalogSearchBar({
         borderRadius="full"
         bg="white"
       >
-        <ComboboxControl flex="1" minW={0} borderWidth={0} shadow="none" borderRadius="0">
-          <ComboboxInput
+        <Combobox.Control flex="1" minW={0} borderWidth={0} shadow="none" borderRadius="0">
+          <Combobox.Input
             flex="1"
             minW={0}
             h="8"
@@ -55,7 +55,7 @@ export function CatalogSearchBar({
             name="catalog-search"
             aria-label={searchAriaLabel}
           />
-        </ComboboxControl>
+        </Combobox.Control>
         <IconButton
           type="submit"
           flexShrink={0}
