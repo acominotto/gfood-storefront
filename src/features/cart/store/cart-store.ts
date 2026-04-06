@@ -275,11 +275,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({ checkoutError: null, error: null });
     try {
       const result = await postCheckout(payload);
-      const redirect = result.payment_result?.redirect_url;
-      if (typeof window !== "undefined" && redirect) {
-        window.location.assign(redirect);
-        return result;
-      }
       await get().fetchCart({ acceptEmptyWhenHadItems: true });
       return result;
     } catch (e) {

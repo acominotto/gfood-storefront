@@ -45,6 +45,41 @@ export function productPath(product: Pick<Product, "id" | "slug">): `/p/${string
 /**
  * Catalog URL for a cart line when the Store API provides `permalink` (pathname tail matches product slug).
  */
+/** Woo order line item fields used to build a storefront `/p/{id}-{slug}` path. */
+export type OrderLineProductLinkFields = {
+  product_id?: number;
+  variation_id?: number | null;
+  permalink?: string | null | undefined;
+};
+
+/**
+ * Catalog URL for a Woo REST order line when `permalink` is present (same rules as cart lines).
+ * Uses `variation_id` when set &gt; 0, otherwise `product_id`.
+ */
+export function productHrefFromOrderLineItem(item: OrderLineProductLinkFields): `/p/${string}` | null {
+  const vid = item.variation_id ?? 0;
+  const pid = item.product_id ?? 0;
+  const lineProductId = typeof vid === "number" && vid > 0 ? vid : pid;
+  if (!lineProductId || lineProductId <= 0) {
+    return null;
+  }
+  const raw = item.permalink;
+  if (!raw) {
+    return null;
+  }
+  try {
+    const path = new URL(raw, "https://g-food.ch").pathname.replace(/\/+$/, "");
+    const segments = path.split("/").filter(Boolean);
+    const slugTail = segments[segments.length - 1];
+    if (!slugTail) {
+      return null;
+    }
+    return `/p/${lineProductId}-${slugTail}`;
+  } catch {
+    return null;
+  }
+}
+
 export function productHrefFromCartLineItem(
   item: Pick<CartLineItem, "id"> & { permalink?: string | null | undefined },
 ): `/p/${string}` | null {

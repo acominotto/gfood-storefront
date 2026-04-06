@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseProductSegment,
   productHrefFromCartLineItem,
+  productHrefFromOrderLineItem,
   productPath,
   productSegment,
   productSegmentTail,
@@ -77,5 +78,30 @@ describe("productHrefFromCartLineItem", () => {
 
   it("returns null without permalink", () => {
     expect(productHrefFromCartLineItem({ id: 1 })).toBeNull();
+  });
+});
+
+describe("productHrefFromOrderLineItem", () => {
+  it("uses product_id and permalink", () => {
+    expect(
+      productHrefFromOrderLineItem({
+        product_id: 12,
+        permalink: "https://g-food.ch/produit/organic-honey/",
+      }),
+    ).toBe("/p/12-organic-honey");
+  });
+
+  it("prefers variation_id when positive", () => {
+    expect(
+      productHrefFromOrderLineItem({
+        product_id: 1,
+        variation_id: 99,
+        permalink: "/shop/variation-slug",
+      }),
+    ).toBe("/p/99-variation-slug");
+  });
+
+  it("returns null without permalink", () => {
+    expect(productHrefFromOrderLineItem({ product_id: 5 })).toBeNull();
   });
 });

@@ -208,7 +208,8 @@ export const checkoutDraftSchema = z
     billing_address: storeApiAddressSchema.optional(),
     shipping_address: storeApiAddressSchema.optional(),
     payment_method: z.string().optional(),
-    payment_result: paymentResultSchema.optional(),
+    /** Woo may send `null` (e.g. COD) where optional JSON would omit the key. */
+    payment_result: paymentResultSchema.nullish(),
     extensions: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();

@@ -21,6 +21,7 @@ export function MobileBottomBar() {
   const { data: session } = useSession();
   const locale = useLocale();
   const pathname = usePathname();
+  const pathForLocaleSwitch = pathname?.startsWith("/") ? pathname : "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [deliveryOpen, setDeliveryOpen] = useState(false);
 
@@ -163,7 +164,7 @@ export function MobileBottomBar() {
                   const meta = LOCALE_NAV_META[loc];
                   return (
                     <Button key={loc} asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
-                      <Link href={pathname} locale={loc} onClick={() => setMenuOpen(false)}>
+                      <Link href={pathForLocaleSwitch} locale={loc} onClick={() => setMenuOpen(false)}>
                         <HStack gap={3} flex="1" py={0.5} w="full">
                           <Image
                             src={meta.flagSrc}

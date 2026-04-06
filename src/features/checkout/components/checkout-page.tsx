@@ -5,14 +5,17 @@ import { Link } from "@/components/ui/link";
 import { useCartStore, getCartItemsCount } from "@/features/cart/store/cart-store";
 import type { CheckoutPayload } from "@/features/catalog/api";
 import { getCheckout, putCheckout } from "@/features/catalog/api";
+import { apiClient } from "@/lib/api-client";
 import { CartDeliveryLine } from "@/components/cart-delivery-line";
 import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
 import { productHrefFromCartLineItem } from "@/lib/product-url";
-import type { CheckoutOrderResult, StoreApiAddress } from "@/server/schemas/cart";
-import { Box, Card, Checkbox, Grid, HStack, Input, Stack, Text, Textarea } from "@chakra-ui/react";
+import type { CartResponse, CheckoutOrderResult, StoreApiAddress } from "@/server/schemas/cart";
+import { Box, Card, Checkbox, Grid, HStack, Input, Link as ChakraLink, Stack, Text, Textarea } from "@chakra-ui/react";
+import { wooOrderReceivedUrl } from "@/lib/woo-order-received-url";
 import { useLocale, useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type BillingForm = {
   first_name: string;
@@ -159,6 +162,180 @@ function formatPaymentMethodId(id: string): string {
     .trim();
 }
 
+function isValidEmail(value: string): boolean {
+  const s = value.trim();
+  if (s.length === 0) {
+    return false;
+  }
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
+
+function shippingRatesFullySelected(cart: CartResponse | null): boolean {
+  if (!cart?.needs_shipping) {
+    return true;
+  }
+  const packages = cart.shipping_rates ?? [];
+  if (packages.length === 0) {
+    return true;
+  }
+  for (const pkg of packages) {
+    const rates = pkg.shipping_rates ?? [];
+    if (rates.length === 0) {
+      continue;
+    }
+    if (!rates.some((r) => r.selected)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+type CheckoutTranslate = (key: string, values?: Record<string, string>) => string;
+
+function collectCheckoutValidation(args: {
+  t: CheckoutTranslate;
+  billing: BillingForm;
+  shipping: ShippingForm;
+  sameShippingAsBilling: boolean;
+  cart: CartResponse | null;
+  needsPay: boolean;
+  paymentMethod: string;
+}): { messages: string[]; fieldKeys: string[] } {
+  const messages: string[] = [];
+  const fieldKeys: string[] = [];
+  const addReq = (key: string, label: string) => {
+    fieldKeys.push(key);
+    messages.push(args.t("requiredField", { field: label }));
+  };
+
+  if (!args.billing.first_name.trim()) {
+    addReq("billing_first_name", args.t("firstName"));
+  }
+  if (!args.billing.last_name.trim()) {
+    addReq("billing_last_name", args.t("lastName"));
+  }
+  if (!args.billing.address_1.trim()) {
+    addReq("billing_address_1", args.t("address"));
+  }
+  if (!args.billing.city.trim()) {
+    addReq("billing_city", args.t("city"));
+  }
+  if (!args.billing.postcode.trim()) {
+    addReq("billing_postcode", args.t("postcode"));
+  }
+  if (!args.billing.country.trim()) {
+    addReq("billing_country", args.t("country"));
+  }
+  if (!args.billing.email.trim()) {
+    addReq("billing_email", args.t("email"));
+  } else if (!isValidEmail(args.billing.email)) {
+    fieldKeys.push("billing_email");
+    messages.push(args.t("invalidEmail"));
+  }
+  if (!args.billing.phone.trim()) {
+    addReq("billing_phone", args.t("phone"));
+  }
+
+  if (!args.sameShippingAsBilling) {
+    if (!args.shipping.first_name.trim()) {
+      addReq("shipping_first_name", args.t("firstName"));
+    }
+    if (!args.shipping.last_name.trim()) {
+      addReq("shipping_last_name", args.t("lastName"));
+    }
+    if (!args.shipping.address_1.trim()) {
+      addReq("shipping_address_1", args.t("address"));
+    }
+    if (!args.shipping.city.trim()) {
+      addReq("shipping_city", args.t("city"));
+    }
+    if (!args.shipping.postcode.trim()) {
+      addReq("shipping_postcode", args.t("postcode"));
+    }
+    if (!args.shipping.country.trim()) {
+      addReq("shipping_country", args.t("country"));
+    }
+  }
+
+  if (args.needsPay && !args.paymentMethod.trim()) {
+    messages.push(args.t("selectPayment"));
+    fieldKeys.push("payment_method");
+  }
+
+  if (!shippingRatesFullySelected(args.cart)) {
+    messages.push(args.t("selectShipping"));
+    fieldKeys.push("shipping_method");
+  }
+
+  const uniqMessages = Array.from(new Set(messages));
+  const uniqFieldKeys = Array.from(new Set(fieldKeys));
+  return { messages: uniqMessages, fieldKeys: uniqFieldKeys };
+}
+
+function CheckoutIssuesPanel({ title, lines }: { title: string; lines: string[] }) {
+  if (lines.length === 0) {
+    return null;
+  }
+  return (
+    <Box
+      rounded="md"
+      borderWidth="1px"
+      borderColor="red.200"
+      bg="red.50"
+      px={4}
+      py={3}
+      role="alert"
+    >
+      <Text fontSize="sm" fontWeight="semibold" color="red.800" mb={2}>
+        {title}
+      </Text>
+      <Box as="ul" pl={5} m={0} style={{ listStyleType: "disc" }}>
+        {lines.map((line, i) => (
+          <Box key={i} as="li" fontSize="sm" color="red.700">
+            {line}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function inputErrorProps(active: boolean) {
+  return active
+    ? { borderColor: "red.500" as const, borderWidth: "1px" as const }
+    : {};
+}
+
+/** Prefer Woo’s redirect URL; else standard order-received URL when `NEXT_PUBLIC_WOO_SITE_URL` + `order_key` are set. */
+function wooOrderDetailsHref(result: CheckoutOrderResult): string | null {
+  const redirect = result.payment_result?.redirect_url?.trim();
+  if (redirect) {
+    try {
+      return new URL(redirect).href;
+    } catch {
+      return null;
+    }
+  }
+  if (result.order_id == null) {
+    return null;
+  }
+  return wooOrderReceivedUrl(result.order_id, result.order_key);
+}
+
+/** Storefront `/o/[id]` with `key` (guest access) and `placed` (thank-you banner). */
+function storefrontOrderSummaryHref(result: CheckoutOrderResult): string | null {
+  if (result.order_id == null) {
+    return null;
+  }
+  const qs = new URLSearchParams();
+  const key = result.order_key?.trim();
+  if (key) {
+    qs.set("key", key);
+  }
+  qs.set("placed", "1");
+  return `/o/${result.order_id}?${qs.toString()}`;
+}
+
 function CheckoutFeeRow({ fee, cartCurrency }: { fee: CartFeeLine; cartCurrency: string | null | undefined }) {
   const locale = useLocale();
   const currency = fee.totals?.currency_code ?? cartCurrency;
@@ -181,6 +358,7 @@ export function CheckoutPage() {
   const t = useTranslations("checkout");
   const tNav = useTranslations("nav");
   const locale = useLocale();
+  const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   const [billing, setBilling] = useState<BillingForm>(billingDefaults);
   const [shipping, setShipping] = useState<ShippingForm>(shippingDefaults);
@@ -192,6 +370,8 @@ export function CheckoutPage() {
   const [orderResult, setOrderResult] = useState<CheckoutOrderResult | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
+  const [flowErrorLines, setFlowErrorLines] = useState<string[]>([]);
+  const [fieldErrorKeys, setFieldErrorKeys] = useState<string[]>([]);
 
   const cart = useCartStore((s) => s.cart);
   const status = useCartStore((s) => s.status);
@@ -203,6 +383,22 @@ export function CheckoutPage() {
   const removeCoupon = useCartStore((s) => s.removeCoupon);
   const submitCheckout = useCartStore((s) => s.submitCheckout);
   const checkoutError = useCartStore((s) => s.checkoutError);
+
+  const clearClientCheckoutHints = useCallback(() => {
+    setFlowErrorLines([]);
+    setFieldErrorKeys([]);
+  }, []);
+
+  const issueLines = useMemo(() => {
+    const lines: string[] = [...flowErrorLines];
+    if (checkoutError) {
+      lines.push(checkoutError);
+    }
+    if (cartError) {
+      lines.push(cartError);
+    }
+    return Array.from(new Set(lines));
+  }, [flowErrorLines, checkoutError, cartError]);
 
   const paymentInitRef = useRef(false);
   /** Drops stale bootstrap work when React Strict Mode or auth re-runs overlap async steps. */
@@ -289,6 +485,19 @@ export function CheckoutPage() {
     prevSessionStatus.current = sessionStatus;
   }, [sessionStatus, loadBootstrap]);
 
+  /** Attach guest Store API orders to the signed-in Woo customer (order_key proves possession). */
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") {
+      return;
+    }
+    const oid = orderResult?.order_id;
+    const okey = orderResult?.order_key?.trim();
+    if (oid == null || !okey) {
+      return;
+    }
+    void apiClient.post("account/link-order", { json: { orderId: oid, orderKey: okey } }).catch(() => {});
+  }, [sessionStatus, orderResult?.order_id, orderResult?.order_key]);
+
   useEffect(() => {
     if (!cart?.payment_methods?.length) {
       return;
@@ -307,19 +516,34 @@ export function CheckoutPage() {
   const cartReady = bootstrapDone && status !== "loading";
   const emptyCart = cartReady && itemCount === 0;
 
-  const checkoutReturnPath = `/${locale}/checkout`;
-  const loginHref = { pathname: "/login" as const, query: { callbackUrl: checkoutReturnPath } };
-  const registerHref = { pathname: "/register" as const, query: { callbackUrl: checkoutReturnPath } };
   const signedInLabel =
     session?.user?.email?.trim() ||
     session?.user?.name?.trim() ||
     null;
 
+  const fieldErr = (key: string) => fieldErrorKeys.includes(key);
+
   async function onSubmit() {
+    useCartStore.setState({ checkoutError: null });
+    setFlowErrorLines([]);
+    setFieldErrorKeys([]);
+
     const needsPay = cart?.needs_payment !== false;
-    if (needsPay && !paymentMethod) {
+    const validation = collectCheckoutValidation({
+      t: t as CheckoutTranslate,
+      billing,
+      shipping,
+      sameShippingAsBilling,
+      cart,
+      needsPay,
+      paymentMethod,
+    });
+    if (validation.messages.length > 0) {
+      setFlowErrorLines(validation.messages);
+      setFieldErrorKeys(validation.fieldKeys);
       return;
     }
+
     const shippingPayload = sameShippingAsBilling ? billingToShippingPayload(billing) : shippingFormToPayload(shipping);
     const methodForWoo = needsPay ? paymentMethod : "";
 
@@ -352,11 +576,31 @@ export function CheckoutPage() {
         order_notes: note,
       });
       const result = await submitCheckout(payload);
-      if (!result.payment_result?.redirect_url) {
-        setOrderResult(result);
+      const payRedirect = result.payment_result?.redirect_url?.trim();
+      if (result.order_id != null && !payRedirect) {
+        if (sessionStatus === "authenticated") {
+          const okey = result.order_key?.trim();
+          if (okey) {
+            void apiClient.post("account/link-order", { json: { orderId: result.order_id, orderKey: okey } }).catch(() => {});
+          }
+        }
+        const qs = new URLSearchParams();
+        const orderKey = result.order_key?.trim();
+        if (orderKey) {
+          qs.set("key", orderKey);
+        }
+        qs.set("placed", "1");
+        router.replace(`/o/${result.order_id}?${qs.toString()}`);
+        return;
       }
-    } catch {
-      /* checkoutError / store error */
+      setOrderResult(result);
+      if (result.order_id == null) {
+        setFlowErrorLines([t("orderIncomplete")]);
+      }
+    } catch (e) {
+      if (!useCartStore.getState().checkoutError) {
+        setFlowErrorLines([e instanceof Error ? e.message : t("submitFailed")]);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -384,7 +628,9 @@ export function CheckoutPage() {
     );
   }
 
-  if (orderResult?.order_id != null && !orderResult.payment_result?.redirect_url) {
+  if (orderResult?.order_id != null && orderResult.payment_result?.redirect_url?.trim()) {
+    const wooHref = wooOrderDetailsHref(orderResult);
+    const shopOrderHref = storefrontOrderSummaryHref(orderResult);
     return (
       <Stack gap={4} py={8} maxW="lg">
         <Text fontSize="2xl" fontWeight="bold">
@@ -395,6 +641,16 @@ export function CheckoutPage() {
             id: String(orderResult.order_number ?? orderResult.order_id),
           })}
         </Text>
+        {shopOrderHref ? (
+          <Link href={shopOrderHref} fontWeight="medium">
+            {t("viewOrderInShop")}
+          </Link>
+        ) : null}
+        {wooHref ? (
+          <ChakraLink href={wooHref} fontWeight="medium" target="_blank" rel="noopener noreferrer">
+            {t("thankYouWooLink")}
+          </ChakraLink>
+        ) : null}
         <Link href="/" fontWeight="medium">
           {tNav("catalog")}
         </Link>
@@ -412,27 +668,7 @@ export function CheckoutPage() {
         </Card.Header>
         <Card.Body>
           <Stack gap={4}>
-            {sessionStatus === "unauthenticated" ? (
-              <Box rounded="md" borderWidth="1px" borderColor="gray.200" bg="gray.50" px={4} py={3}>
-                <Stack gap={2}>
-                  <Text fontSize="sm" fontWeight="semibold">
-                    {t("haveAccount")}
-                  </Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    {t("signInForCheckout")}
-                  </Text>
-                  <HStack gap={4} flexWrap="wrap">
-                    <Link href={loginHref} fontWeight="medium">
-                      {tNav("login")}
-                    </Link>
-                    <Link href={registerHref} fontWeight="medium">
-                      {tNav("register")}
-                    </Link>
-                  </HStack>
-                </Stack>
-              </Box>
-            ) : null}
-            {sessionStatus === "authenticated" && signedInLabel ? (
+            {signedInLabel ? (
               <Box rounded="md" borderWidth="1px" borderColor="brand.200" bg="brand.50" px={4} py={3}>
                 <Text fontSize="sm" color="fg.muted">
                   {t("signedInAs", { email: signedInLabel })}
@@ -444,44 +680,74 @@ export function CheckoutPage() {
               <Input
                 placeholder={t("firstName")}
                 value={billing.first_name}
-                onChange={(e) => setBilling((prev) => ({ ...prev, first_name: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, first_name: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_first_name"))}
               />
               <Input
                 placeholder={t("lastName")}
                 value={billing.last_name}
-                onChange={(e) => setBilling((prev) => ({ ...prev, last_name: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, last_name: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_last_name"))}
               />
             </Grid>
             <Input
               placeholder={t("company")}
               value={billing.company}
-              onChange={(e) => setBilling((prev) => ({ ...prev, company: e.target.value }))}
+              onChange={(e) => {
+                clearClientCheckoutHints();
+                setBilling((prev) => ({ ...prev, company: e.target.value }));
+              }}
             />
             <Input
               placeholder={t("address")}
               value={billing.address_1}
-              onChange={(e) => setBilling((prev) => ({ ...prev, address_1: e.target.value }))}
+              onChange={(e) => {
+                clearClientCheckoutHints();
+                setBilling((prev) => ({ ...prev, address_1: e.target.value }));
+              }}
+              {...inputErrorProps(fieldErr("billing_address_1"))}
             />
             <Input
               placeholder={t("address2")}
               value={billing.address_2}
-              onChange={(e) => setBilling((prev) => ({ ...prev, address_2: e.target.value }))}
+              onChange={(e) => {
+                clearClientCheckoutHints();
+                setBilling((prev) => ({ ...prev, address_2: e.target.value }));
+              }}
             />
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={3}>
               <Input
                 placeholder={t("city")}
                 value={billing.city}
-                onChange={(e) => setBilling((prev) => ({ ...prev, city: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, city: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_city"))}
               />
               <Input
                 placeholder={t("postcode")}
                 value={billing.postcode}
-                onChange={(e) => setBilling((prev) => ({ ...prev, postcode: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, postcode: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_postcode"))}
               />
               <Input
                 placeholder={t("country")}
                 value={billing.country}
-                onChange={(e) => setBilling((prev) => ({ ...prev, country: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, country: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_country"))}
               />
             </Grid>
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={3}>
@@ -489,18 +755,29 @@ export function CheckoutPage() {
                 type="email"
                 placeholder={t("email")}
                 value={billing.email}
-                onChange={(e) => setBilling((prev) => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, email: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_email"))}
               />
               <Input
                 placeholder={t("phone")}
                 value={billing.phone}
-                onChange={(e) => setBilling((prev) => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) => {
+                  clearClientCheckoutHints();
+                  setBilling((prev) => ({ ...prev, phone: e.target.value }));
+                }}
+                {...inputErrorProps(fieldErr("billing_phone"))}
               />
             </Grid>
 
             <Checkbox.Root
               checked={sameShippingAsBilling}
-              onCheckedChange={(d) => setSameShippingAsBilling(!!d.checked)}
+              onCheckedChange={(d) => {
+                clearClientCheckoutHints();
+                setSameShippingAsBilling(!!d.checked);
+              }}
             >
               <Checkbox.HiddenInput />
               <Checkbox.Control />
@@ -514,51 +791,87 @@ export function CheckoutPage() {
                   <Input
                     placeholder={t("firstName")}
                     value={shipping.first_name}
-                    onChange={(e) => setShipping((prev) => ({ ...prev, first_name: e.target.value }))}
+                    onChange={(e) => {
+                      clearClientCheckoutHints();
+                      setShipping((prev) => ({ ...prev, first_name: e.target.value }));
+                    }}
+                    {...inputErrorProps(fieldErr("shipping_first_name"))}
                   />
                   <Input
                     placeholder={t("lastName")}
                     value={shipping.last_name}
-                    onChange={(e) => setShipping((prev) => ({ ...prev, last_name: e.target.value }))}
+                    onChange={(e) => {
+                      clearClientCheckoutHints();
+                      setShipping((prev) => ({ ...prev, last_name: e.target.value }));
+                    }}
+                    {...inputErrorProps(fieldErr("shipping_last_name"))}
                   />
                 </Grid>
                 <Input
                   placeholder={t("company")}
                   value={shipping.company}
-                  onChange={(e) => setShipping((prev) => ({ ...prev, company: e.target.value }))}
+                  onChange={(e) => {
+                    clearClientCheckoutHints();
+                    setShipping((prev) => ({ ...prev, company: e.target.value }));
+                  }}
                 />
                 <Input
                   placeholder={t("address")}
                   value={shipping.address_1}
-                  onChange={(e) => setShipping((prev) => ({ ...prev, address_1: e.target.value }))}
+                  onChange={(e) => {
+                    clearClientCheckoutHints();
+                    setShipping((prev) => ({ ...prev, address_1: e.target.value }));
+                  }}
+                  {...inputErrorProps(fieldErr("shipping_address_1"))}
                 />
                 <Input
                   placeholder={t("address2")}
                   value={shipping.address_2}
-                  onChange={(e) => setShipping((prev) => ({ ...prev, address_2: e.target.value }))}
+                  onChange={(e) => {
+                    clearClientCheckoutHints();
+                    setShipping((prev) => ({ ...prev, address_2: e.target.value }));
+                  }}
                 />
                 <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={3}>
                   <Input
                     placeholder={t("city")}
                     value={shipping.city}
-                    onChange={(e) => setShipping((prev) => ({ ...prev, city: e.target.value }))}
+                    onChange={(e) => {
+                      clearClientCheckoutHints();
+                      setShipping((prev) => ({ ...prev, city: e.target.value }));
+                    }}
+                    {...inputErrorProps(fieldErr("shipping_city"))}
                   />
                   <Input
                     placeholder={t("postcode")}
                     value={shipping.postcode}
-                    onChange={(e) => setShipping((prev) => ({ ...prev, postcode: e.target.value }))}
+                    onChange={(e) => {
+                      clearClientCheckoutHints();
+                      setShipping((prev) => ({ ...prev, postcode: e.target.value }));
+                    }}
+                    {...inputErrorProps(fieldErr("shipping_postcode"))}
                   />
                   <Input
                     placeholder={t("country")}
                     value={shipping.country}
-                    onChange={(e) => setShipping((prev) => ({ ...prev, country: e.target.value }))}
+                    onChange={(e) => {
+                      clearClientCheckoutHints();
+                      setShipping((prev) => ({ ...prev, country: e.target.value }));
+                    }}
+                    {...inputErrorProps(fieldErr("shipping_country"))}
                   />
                 </Grid>
               </Stack>
             ) : null}
 
             {cart?.needs_shipping && (cart.shipping_rates?.length ?? 0) > 0 ? (
-              <Stack gap={2}>
+              <Stack
+                gap={2}
+                rounded="md"
+                borderWidth={fieldErr("shipping_method") ? "2px" : "0"}
+                borderColor={fieldErr("shipping_method") ? "red.500" : "transparent"}
+                p={fieldErr("shipping_method") ? 2 : 0}
+              >
                 <Text fontWeight="semibold">{t("shippingMethod")}</Text>
                 {cart.shipping_rates.map((pkg) => (
                   <Stack key={pkg.package_id} gap={2} borderWidth="1px" rounded="md" p={3}>
@@ -573,6 +886,7 @@ export function CheckoutPage() {
                             name={`ship-${pkg.package_id}`}
                             checked={!!rate.selected}
                             onChange={() => {
+                              clearClientCheckoutHints();
                               void selectShippingRate(pkg.package_id, rate.rate_id);
                             }}
                           />
@@ -591,7 +905,13 @@ export function CheckoutPage() {
             ) : null}
 
             {(cart?.payment_methods?.length ?? 0) > 0 ? (
-              <Stack gap={2}>
+              <Stack
+                gap={2}
+                rounded="md"
+                borderWidth={fieldErr("payment_method") ? "2px" : "0"}
+                borderColor={fieldErr("payment_method") ? "red.500" : "transparent"}
+                p={fieldErr("payment_method") ? 2 : 0}
+              >
                 <Text fontWeight="semibold">{t("paymentMethod")}</Text>
                 {(cart?.payment_methods ?? []).map((id) => (
                   <label key={id}>
@@ -600,7 +920,10 @@ export function CheckoutPage() {
                         type="radio"
                         name="payment"
                         checked={paymentMethod === id}
-                        onChange={() => setPaymentMethod(id)}
+                        onChange={() => {
+                          clearClientCheckoutHints();
+                          setPaymentMethod(id);
+                        }}
                       />
                       <Text fontSize="sm">{formatPaymentMethodId(id)}</Text>
                     </HStack>
@@ -616,23 +939,19 @@ export function CheckoutPage() {
             <Textarea
               placeholder={t("orderNote")}
               value={note}
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(e) => {
+                clearClientCheckoutHints();
+                setNote(e.target.value);
+              }}
             />
 
-            {cartError ? (
-              <Text fontSize="sm" color="red.600">
-                {cartError}
-              </Text>
-            ) : null}
-            {checkoutError ? (
-              <Text fontSize="sm" color="red.600">
-                {checkoutError}
-              </Text>
-            ) : null}
+            <CheckoutIssuesPanel title={t("issuesTitle")} lines={issueLines} />
 
             <Button
               disabled={submitting || (cart?.needs_payment !== false && !paymentMethod)}
-              onClick={() => void onSubmit()}
+              loading={submitting}
+              loadingText={t("submitting")}
+              onClick={() => onSubmit()}
             >
               {t("submit")}
             </Button>

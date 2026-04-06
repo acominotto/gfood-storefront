@@ -21,6 +21,8 @@ export function NavAccountMenu() {
   const { data: session } = useSession();
   const locale = useLocale();
   const pathname = usePathname();
+  /** next-intl prefixes locale + pathname; undefined pathname becomes the literal "undefined". */
+  const pathForLocaleSwitch = pathname?.startsWith("/") ? pathname : "/";
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const langCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,6 +87,12 @@ export function NavAccountMenu() {
           </>
         ) : null}
 
+        {session ? (
+          <Menu.Item value="orders" asChild>
+            <Link href="/orders">{t("orderHistory")}</Link>
+          </Menu.Item>
+        ) : null}
+
         <Menu.Root
           open={langMenuOpen}
           onOpenChange={(d) => {
@@ -130,7 +138,7 @@ export function NavAccountMenu() {
               const meta = LOCALE_NAV_META[loc];
               return (
                 <Menu.Item key={loc} value={loc} asChild>
-                  <Link href={pathname} locale={loc}>
+                  <Link href={pathForLocaleSwitch} locale={loc}>
                     <HStack gap={2} flex="1" py={0.5}>
                       <Image
                         src={meta.flagSrc}
