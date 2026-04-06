@@ -75,9 +75,14 @@ export function NavAccountMenu() {
         ) : null}
 
         {!session ? (
-          <Menu.Item value="login" asChild>
-            <Link href="/login">{t("login")}</Link>
-          </Menu.Item>
+          <>
+            <Menu.Item value="login" asChild>
+              <Link href="/login">{t("login")}</Link>
+            </Menu.Item>
+            <Menu.Item value="register" asChild>
+              <Link href="/register">{t("register")}</Link>
+            </Menu.Item>
+          </>
         ) : null}
 
         <Menu.Root

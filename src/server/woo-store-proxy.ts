@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { getWooSessionHeaders, persistWooSessionHeaders } from "@/server/woo-client";
+import { shouldPersistWooCartToken } from "@/server/woo-cart-token-policy";
 
 /** Allow `%` for percent-encoded coupon codes in paths like `cart/coupons/{code}`. */
 const SEGMENT_RE = /^[a-zA-Z0-9._%-]+$/;
@@ -56,7 +57,7 @@ export async function forwardWooStoreApiRequest(request: Request, pathSegments: 
   }
 
   const response = await fetch(upstream, init);
-  const persistCartToken = !(pathSegments[0] === "checkout" && method === "GET");
+  const persistCartToken = shouldPersistWooCartToken(pathSegments, method);
   await persistWooSessionHeaders(response.headers, { persistCartToken });
   return response;
 }

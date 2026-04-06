@@ -9,6 +9,8 @@ const SEARCH_DEBOUNCE_MS = 500;
 
 export function useSyncCatalogProducts(perPage: number) {
   const category = useCatalogFilterStore((s) => s.category);
+  const origineSlugs = useCatalogFilterStore((s) => s.origineSlugs);
+  const regimeSlugs = useCatalogFilterStore((s) => s.regimeSlugs);
   const catalogSearch = useNavbarStore((s) => s.catalogSearch);
   const [appliedSearch, setAppliedSearch] = useState(catalogSearch);
 
@@ -30,8 +32,14 @@ export function useSyncCatalogProducts(perPage: number) {
     if (category) {
       params.set("category", category);
     }
+    for (const slug of origineSlugs) {
+      params.append("origine", slug);
+    }
+    for (const slug of regimeSlugs) {
+      params.append("regime", slug);
+    }
     return params;
-  }, [category, appliedSearch, perPage]);
+  }, [category, origineSlugs, regimeSlugs, appliedSearch, perPage]);
 
   const signature = baseQuery.toString();
   const resetAndFetchFirstPage = useProductsStore((s) => s.resetAndFetchFirstPage);

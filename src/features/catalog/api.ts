@@ -61,8 +61,12 @@ async function parseWooJson<T>(responsePromise: Promise<Response>, schema: z.Zod
 }
 
 export async function getProducts(query: URLSearchParams) {
-  const response = await apiClient.get(`catalog/products?${query.toString()}`);
-  return productsResponseSchema.parse(await response.json());
+  try {
+    const response = await apiClient.get(`catalog/products?${query.toString()}`);
+    return productsResponseSchema.parse(await response.json());
+  } catch (e) {
+    throw new Error(await formatWooHttpError(e));
+  }
 }
 
 export async function getFacets() {

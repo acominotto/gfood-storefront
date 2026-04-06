@@ -3,6 +3,7 @@
     "catalog": "Online bestellen",
     "delivery": "Lieferung",
     "login": "Anmelden",
+    "register": "Registrieren",
     "cart": "Warenkorb",
     "items": "Artikel",
     "total": "Total",
@@ -44,7 +45,21 @@
     "breadcrumbHome": "Start",
     "promoBadge": "Im Aufbau",
     "promoTitle": "Aktionen",
-    "promoDescription": "Angebote und Highlights erscheinen hier in Kürze."
+    "promoDescription": "Angebote und Highlights erscheinen hier in Kürze.",
+    "origineSectionTitle": "Herkunft",
+    "origineFilterLabel": "Herkunft",
+    "origineFilterAria": "Nach Herkunft filtern (Mehrfachauswahl)",
+    "origineFilterHint": "Produkte anzeigen, die mindestens eine Herkunft erfüllen.",
+    "origineFilterLoading": "Herkünfte werden geladen…",
+    "origineFilterEmpty": "Keine Herkunftsoptionen. Prüfen Sie `pa_origine` in WooCommerce und `src/lib/woo-origine-regime.ts`.",
+    "origineClear": "Herkunftfilter zurücksetzen",
+    "regimeSectionTitle": "Ernährung",
+    "regimeFilterLabel": "Ernährung",
+    "regimeFilterAria": "Nach Ernährung / Regime filtern (Mehrfachauswahl)",
+    "regimeFilterHint": "Produkte anzeigen, die mindestens eine Ernährungsart erfüllen.",
+    "regimeFilterLoading": "Ernährungsoptionen werden geladen…",
+    "regimeFilterEmpty": "Keine Ernährungsoptionen. Prüfen Sie `pa_regime` in WooCommerce und `src/lib/woo-origine-regime.ts`.",
+    "regimeClear": "Ernährungsfilter zurücksetzen"
   },
   "checkout": {
     "title": "Kasse",
@@ -77,7 +92,10 @@
     "promoApply": "Einlösen",
     "promoRemove": "Entfernen",
     "promoApplying": "Wird angewendet…",
-    "promoUnknown": "Etwas ist schiefgelaufen"
+    "promoUnknown": "Etwas ist schiefgelaufen",
+    "haveAccount": "Sie haben bereits ein Konto?",
+    "signInForCheckout": "Melden Sie sich an, um gespeicherte Angaben zu nutzen und diese Bestellung mit Ihrem Konto zu verknüpfen.",
+    "signedInAs": "Angemeldet als {email}"
   },
   "delivery": {
     "title": "Lieferung",
@@ -106,7 +124,25 @@
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort ausblenden",
     "google": "Mit Google fortfahren",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "registerMetaTitle": "Konto erstellen | G-Food",
+    "registerMetaDescription": "Erstellen Sie Ihr G-Food-Konto, um sich beim Checkout schneller anzumelden.",
+    "registerTitle": "Konto erstellen",
+    "registerSubtitle": "Mit E-Mail und Passwort. Sie können sich danach sofort in diesem Shop anmelden.",
+    "registerEmail": "E-Mail",
+    "registerNameOptional": "Name (optional)",
+    "registerPasswordHint": "Mindestens 8 Zeichen.",
+    "registerConfirmPassword": "Passwort bestätigen",
+    "registerSubmit": "Konto erstellen",
+    "registerPasswordMismatch": "Die Passwörter stimmen nicht überein.",
+    "registerErrorEmailExists": "Mit dieser E-Mail existiert bereits ein Konto. Bitte anmelden.",
+    "registerErrorGeneric": "Registrierung fehlgeschlagen. Bitte erneut versuchen.",
+    "registerErrorValidation": "Bitte E-Mail und Passwort prüfen und erneut versuchen.",
+    "registerErrorSignInAfter": "Konto erstellt, aber Anmeldung fehlgeschlagen. Bitte manuell anmelden.",
+    "registerErrorRateLimit": "Zu viele Versuche. Bitte eine Minute warten und erneut versuchen.",
+    "registerHaveAccount": "Sie haben bereits ein Konto?",
+    "securityOriginRejected": "Wir konnten nicht bestätigen, dass diese Anfrage von unserem Shop stammt. Bitte dieselbe Adresse wie in der Browserzeile verwenden oder die Seite neu laden und erneut versuchen.",
+    "registerErrorWpSync": "Ihr Konto konnte nicht erstellt werden: Der Shop konnte die Hauptwebsite nicht erreichen. Bitte später erneut versuchen oder uns kontaktieren."
   },
   "footer": {
     "impressum": "Impressum"

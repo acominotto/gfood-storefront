@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+import { CATALOG_PRODUCTS_CACHE_TAG } from "@/server/cached-catalog-product-list";
 import { createWooClient } from "@/server/woo-client";
 import { categoryListSchema } from "@/server/schemas/catalog";
 
@@ -30,7 +32,11 @@ async function fetchAllStoreCollection(path: string) {
 }
 
 export async function getAllProductCategories() {
-  return fetchAllStoreCollection("products/categories");
+  return unstable_cache(
+    async () => fetchAllStoreCollection("products/categories"),
+    ["woo-product-categories"],
+    { revalidate: 600, tags: [CATALOG_PRODUCTS_CACHE_TAG] },
+  )();
 }
 
 export async function getAllProductTags() {

@@ -3,6 +3,7 @@
     "catalog": "Ordina online",
     "delivery": "Consegna",
     "login": "Accedi",
+    "register": "Registrati",
     "cart": "Carrello",
     "items": "articoli",
     "total": "Totale",
@@ -44,7 +45,21 @@
     "breadcrumbHome": "Home",
     "promoBadge": "In allestimento",
     "promoTitle": "Promozioni",
-    "promoDescription": "Offerte e prodotti in evidenza saranno disponibili a breve."
+    "promoDescription": "Offerte e prodotti in evidenza saranno disponibili a breve.",
+    "origineSectionTitle": "Origine",
+    "origineFilterLabel": "Origine",
+    "origineFilterAria": "Filtra per origine (multi-selezione)",
+    "origineFilterHint": "Mostra prodotti che corrispondono ad almeno un’origine.",
+    "origineFilterLoading": "Caricamento origini…",
+    "origineFilterEmpty": "Nessuna origine trovata. Verificare `pa_origine` in WooCommerce e `src/lib/woo-origine-regime.ts`.",
+    "origineClear": "Azzera filtri origine",
+    "regimeSectionTitle": "Regime",
+    "regimeFilterLabel": "Regime",
+    "regimeFilterAria": "Filtra per regime alimentare (multi-selezione)",
+    "regimeFilterHint": "Mostra prodotti che corrispondono ad almeno un regime.",
+    "regimeFilterLoading": "Caricamento opzioni regime…",
+    "regimeFilterEmpty": "Nessun regime trovato. Verificare `pa_regime` in WooCommerce e `src/lib/woo-origine-regime.ts`.",
+    "regimeClear": "Azzera filtri regime"
   },
   "checkout": {
     "title": "Cassa",
@@ -77,7 +92,10 @@
     "promoApply": "Applica",
     "promoRemove": "Rimuovi",
     "promoApplying": "Applicazione…",
-    "promoUnknown": "Si è verificato un errore"
+    "promoUnknown": "Si è verificato un errore",
+    "haveAccount": "Hai già un account?",
+    "signInForCheckout": "Accedi per usare i dati salvati e collegare questo ordine al tuo account.",
+    "signedInAs": "Accesso effettuato come {email}"
   },
   "delivery": {
     "title": "Consegna",
@@ -106,7 +124,25 @@
     "showPassword": "Mostra password",
     "hidePassword": "Nascondi password",
     "google": "Continua con Google",
-    "logout": "Esci"
+    "logout": "Esci",
+    "registerMetaTitle": "Crea un account | G-Food",
+    "registerMetaDescription": "Crea il tuo account G-Food per accedere più velocemente al checkout.",
+    "registerTitle": "Crea un account",
+    "registerSubtitle": "Usa la tua e-mail e una password. Potrai accedere subito a questo negozio.",
+    "registerEmail": "E-mail",
+    "registerNameOptional": "Nome (facoltativo)",
+    "registerPasswordHint": "Almeno 8 caratteri.",
+    "registerConfirmPassword": "Conferma password",
+    "registerSubmit": "Crea account",
+    "registerPasswordMismatch": "Le password non coincidono.",
+    "registerErrorEmailExists": "Esiste già un account con questa e-mail. Accedi invece.",
+    "registerErrorGeneric": "Registrazione non riuscita. Riprova.",
+    "registerErrorValidation": "Controlla e-mail e password e riprova.",
+    "registerErrorSignInAfter": "Account creato, ma l'accesso non è riuscito. Prova ad accedere manualmente.",
+    "registerErrorRateLimit": "Troppi tentativi. Attendi un minuto e riprova.",
+    "registerHaveAccount": "Hai già un account?",
+    "securityOriginRejected": "Non abbiamo potuto verificare che la richiesta provenga dal nostro negozio. Usa lo stesso indirizzo nella barra del browser oppure aggiorna la pagina e riprova.",
+    "registerErrorWpSync": "Non è stato possibile creare l’account: il negozio non ha potuto contattare il sito principale. Riprova più tardi o contattaci."
   },
   "footer": {
     "impressum": "Note legali"

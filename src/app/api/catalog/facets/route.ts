@@ -1,17 +1,35 @@
 import { createWooClient } from "@/server/woo-client";
 import { jsonError, jsonOk } from "@/server/api-response";
+import {
+  collectFacetTermsForTaxonomy,
+  mergeTermLists,
+} from "@/server/regime-attribute";
 import { facetsResponseSchema, productListSchema } from "@/server/schemas/catalog";
+import { fetchOrigineRegimeFacetTermsFromApi } from "@/server/woo-origine-regime-facet-terms";
+import {
+  WOO_ORIGINE_ATTRIBUTE_TAXONOMY,
+  WOO_REGIME_DIET_ATTRIBUTE_TAXONOMY,
+} from "@/lib/woo-origine-regime";
 import { getAllProductCategories } from "@/server/woo-taxonomies";
 
 export async function GET() {
   try {
     const woo = createWooClient();
 
-    const [categories, productsResp] = await Promise.all([
+    const [categories, productsResp, fromApi] = await Promise.all([
       getAllProductCategories(),
       woo.get("products?per_page=100"),
+      fetchOrigineRegimeFacetTermsFromApi(),
     ]);
     const products = productListSchema.parse(await productsResp.json());
+    const origineTerms = mergeTermLists(
+      fromApi.origineTerms,
+      collectFacetTermsForTaxonomy(products, WOO_ORIGINE_ATTRIBUTE_TAXONOMY),
+    );
+    const regimeTerms = mergeTermLists(
+      fromApi.regimeTerms,
+      collectFacetTermsForTaxonomy(products, WOO_REGIME_DIET_ATTRIBUTE_TAXONOMY),
+    );
 
     const values = products
       .map((product: (typeof products)[number]) => Number(product.prices?.price ?? 0))
@@ -22,6 +40,8 @@ export async function GET() {
     const payload = facetsResponseSchema.parse({
       categories,
       priceRange: { min, max },
+      origineTerms,
+      regimeTerms,
     });
 
     return jsonOk(payload, {

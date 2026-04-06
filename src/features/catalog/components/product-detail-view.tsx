@@ -5,6 +5,7 @@ import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { ProductCategoryBreadcrumb } from "@/features/catalog/components/product-category-breadcrumb";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
 import { useCartStore } from "@/features/cart/store/cart-store";
+import type { RegimeTerm } from "@/lib/regime-term";
 import type { Category, Product } from "@/server/schemas/catalog";
 import { Badge, Box, Grid, Heading, HStack, Image, Stack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
@@ -13,6 +14,10 @@ type ProductDetailViewProps = {
   product: Product;
   locale: string;
   categories: Category[];
+  /** `pa_origine` terms; computed on the server. */
+  origineTerms?: RegimeTerm[];
+  /** `pa_regime` (diet) terms; computed on the server. */
+  regimeTerms?: RegimeTerm[];
 };
 
 function formatPrice(amount: string | undefined, locale: string) {
@@ -36,7 +41,13 @@ function imageProxyUrl(src: string, opts: { thumb?: boolean }) {
   return `/api/images/${new URL(src, "https://g-food.ch").pathname.replace(/^\//, "")}?${params.toString()}`;
 }
 
-export function ProductDetailView({ product, locale, categories }: ProductDetailViewProps) {
+export function ProductDetailView({
+  product,
+  locale,
+  categories,
+  origineTerms = [],
+  regimeTerms = [],
+}: ProductDetailViewProps) {
   const t = useTranslations("catalog");
   const tNav = useTranslations("nav");
   const line = useCartStore((s) => s.cart?.items.find((entry) => entry.id === product.id));
@@ -153,6 +164,34 @@ export function ProductDetailView({ product, locale, categories }: ProductDetail
               {formatPrice(product.prices?.price, locale)}
             </Text>
           </HStack>
+          {origineTerms.length > 0 ? (
+            <Stack gap={2} align="start">
+              <Text fontSize="sm" fontWeight="semibold" color="gray.600">
+                {t("origineSectionTitle")}
+              </Text>
+              <HStack gap={2} flexWrap="wrap">
+                {origineTerms.map((term) => (
+                  <Badge key={`o-${term.slug}`} colorPalette="blue" variant="outline" fontSize="sm">
+                    {term.name}
+                  </Badge>
+                ))}
+              </HStack>
+            </Stack>
+          ) : null}
+          {regimeTerms.length > 0 ? (
+            <Stack gap={2} align="start">
+              <Text fontSize="sm" fontWeight="semibold" color="gray.600">
+                {t("regimeSectionTitle")}
+              </Text>
+              <HStack gap={2} flexWrap="wrap">
+                {regimeTerms.map((term) => (
+                  <Badge key={`r-${term.slug}`} colorPalette="brand" variant="outline" fontSize="sm">
+                    {term.name}
+                  </Badge>
+                ))}
+              </HStack>
+            </Stack>
+          ) : null}
           {product.short_description ? (
             <Box
               fontSize="md"

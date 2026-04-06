@@ -1,17 +1,10 @@
 import { env } from "@/lib/env";
+import { slugifyWpUsername } from "@/lib/wp-username-slug";
 import { authenticateWpUserWithPassword } from "@/server/wp-auth";
-import { findOrCreateWpUser } from "@/server/wp-client";
+import { findOrCreateWpUser } from "@/server/wordpress/users";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-
-function slugifyUsername(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 32);
-}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -37,20 +30,25 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const identifier = credentials?.email?.trim();
-        const password = credentials?.password;
-        if (!identifier || !password) return null;
+        try {
+          const identifier = credentials?.email?.trim();
+          const password = credentials?.password;
+          if (!identifier || !password) return null;
 
-        const wpUser = await authenticateWpUserWithPassword(identifier, password);
-        if (!wpUser?.id) return null;
+          const wpUser = await authenticateWpUserWithPassword(identifier, password);
+          if (!wpUser?.id) return null;
 
-        return {
-          id: String(wpUser.id),
-          email: wpUser.email ?? identifier,
-          name: wpUser.name ?? undefined,
-          wpUserId: wpUser.id,
-          role: wpUser.roles?.[0],
-        };
+          return {
+            id: String(wpUser.id),
+            email: wpUser.email ?? identifier,
+            name: wpUser.name ?? undefined,
+            wpUserId: wpUser.id,
+            role: wpUser.roles?.[0],
+          };
+        } catch (e) {
+          console.error("[next-auth] credentials authorize error", e);
+          return null;
+        }
       },
     }),
     GoogleProvider({
@@ -65,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         const wpUser = await findOrCreateWpUser({
           email: profile.email,
           name: profile.name,
-          username: `${slugifyUsername(usernameSeed)}-${Math.floor(Math.random() * 9999)}`,
+          username: `${slugifyWpUsername(usernameSeed)}-${Math.floor(Math.random() * 9999)}`,
         });
         token.wpUserId = wpUser.id;
         token.wpRole = wpUser.roles?.[0];
@@ -74,7 +72,8 @@ export const authOptions: NextAuthOptions = {
         const pic = (profile as { picture?: string }).picture;
         token.picture = pic ?? null;
         token.sub = String(wpUser.id);
-      } else if (account?.provider === "credentials" && user) {
+      } else if (user && typeof user.wpUserId === "number") {
+        /* Credentials (and any custom provider that sets wpUserId). Do not rely on `account` shape. */
         token.wpUserId = user.wpUserId;
         token.wpRole = user.role;
         token.email = user.email ?? null;

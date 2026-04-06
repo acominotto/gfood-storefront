@@ -2,7 +2,9 @@
 
 import { CartDeliveryLine } from "@/components/cart-delivery-line";
 import { CartQuantityRow } from "@/components/cart-quantity-row";
+import { Link } from "@/components/ui/link";
 import { useCartStore } from "@/features/cart/store/cart-store";
+import { productHrefFromCartLineItem } from "@/lib/product-url";
 import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
 import { Box, Card, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -55,9 +57,17 @@ export default function CartPage() {
       </Card.Header>
       <Card.Body>
         <Stack gap={4}>
-          {cart?.items?.map((item) => (
+          {cart?.items?.map((item) => {
+            const href = productHrefFromCartLineItem(item);
+            return (
             <Box key={item.key} borderWidth="1px" rounded="md" p={3}>
-              <Text fontWeight="semibold">{item.name}</Text>
+              {href ? (
+                <Link href={href} variant="plain" fontWeight="semibold" _hover={{ textDecoration: "underline" }}>
+                  {item.name}
+                </Link>
+              ) : (
+                <Text fontWeight="semibold">{item.name}</Text>
+              )}
               <Box mt={2}>
                 <CartQuantityRow
                   quantity={item.quantity}
@@ -74,7 +84,8 @@ export default function CartPage() {
                 />
               </Box>
             </Box>
-          ))}
+            );
+          })}
           {cart?.fees?.map((fee) => (
             <CartFeeRow key={fee.key} fee={fee} cartCurrency={cart?.totals?.currency_code} />
           ))}

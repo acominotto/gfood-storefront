@@ -10,8 +10,9 @@ const envSchema = z.object({
   WP_BASE_URL: z.string().url(),
   WP_REST_BASE: z.string().default("/wp-json"),
   WP_SYNC_ENDPOINT: z.string().default("/wp/v2/users"),
-  WP_SYNC_AUTH_USER: z.string().min(1),
-  WP_SYNC_AUTH_PASS: z.string().min(1),
+  WP_SYNC_AUTH_USER: z.string().optional(),
+  WP_SYNC_AUTH_PASS: z.string().optional(),
+  /** Path under WP_REST_BASE, no leading slash. Tmeister JWT: `jwt-auth/v1/token`; miniOrange: `api/v1/token`. */
   WP_JWT_AUTH_PATH: z.string().default("jwt-auth/v1/token"),
   WOO_STORE_API_BASE: z.string().default("/wp-json/wc/store/v1"),
   WOO_CONSUMER_KEY: z.string().optional(),
@@ -29,9 +30,27 @@ const envSchema = z.object({
     .transform((s) => s === "true"),
   UPSTREAM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
+  /** Log WordPress auth steps to the server console (never logs passwords). */
+  WP_AUTH_DEBUG: z
+    .string()
+    .optional()
+    .transform((s) => s === "true"),
 });
 
-const parsed = envSchema.safeParse({
+const envSchemaWithRefine = envSchema.superRefine((data, ctx) => {
+  const woo = Boolean(data.WOO_CONSUMER_KEY?.trim() && data.WOO_CONSUMER_SECRET?.trim());
+  const sync = Boolean(data.WP_SYNC_AUTH_USER?.trim() && data.WP_SYNC_AUTH_PASS?.trim());
+  if (!woo && !sync) {
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "Set WOO_CONSUMER_KEY + WOO_CONSUMER_SECRET (WooCommerce REST API) and/or WP_SYNC_AUTH_USER + WP_SYNC_AUTH_PASS (WordPress application password). At least one pair is required.",
+      path: ["WOO_CONSUMER_KEY"],
+    });
+  }
+});
+
+const parsed = envSchemaWithRefine.safeParse({
   NODE_ENV: process.env.NODE_ENV,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
@@ -56,6 +75,7 @@ const parsed = envSchema.safeParse({
   IMAGE_PROXY_REMOVE_BG: process.env.IMAGE_PROXY_REMOVE_BG,
   UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
   RATE_LIMIT_PER_MINUTE: process.env.RATE_LIMIT_PER_MINUTE,
+  WP_AUTH_DEBUG: process.env.WP_AUTH_DEBUG,
 });
 
 if (!parsed.success) {

@@ -1,12 +1,13 @@
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
+import { getWooStoreBaseUrl } from "@/lib/woo-store-url";
 import { createHttpClient } from "@/server/http";
 
 const CART_TOKEN_COOKIE = "woo_cart_token";
 const STORE_NONCE_COOKIE = "woo_store_nonce";
 
 export function getWooBaseUrl() {
-  return new URL(env.WOO_STORE_API_BASE, env.WP_BASE_URL).toString();
+  return getWooStoreBaseUrl();
 }
 
 export async function getWooSessionHeaders() {

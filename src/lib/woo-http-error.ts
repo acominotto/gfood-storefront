@@ -4,9 +4,20 @@ import { HTTPError } from "ky";
 export async function formatWooHttpError(error: unknown): Promise<string> {
   if (error instanceof HTTPError) {
     try {
-      const data = (await error.response.json()) as { message?: string; code?: string };
-      if (typeof data.message === "string" && data.message.length > 0) {
-        return data.code ? `${data.message} (${data.code})` : data.message;
+      const data = (await error.response.json()) as {
+        message?: string;
+        code?: string;
+        /** Next.js API routes (`jsonError`) and some proxies use `error`. */
+        error?: string;
+      };
+      const text =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : typeof data.error === "string" && data.error.length > 0
+            ? data.error
+            : "";
+      if (text.length > 0) {
+        return data.code ? `${text} (${data.code})` : text;
       }
     } catch {
       /* ignore non-JSON */

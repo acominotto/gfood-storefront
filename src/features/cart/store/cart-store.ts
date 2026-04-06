@@ -25,11 +25,19 @@ export type CartStoreState = {
   checkoutError: string | null;
 };
 
+export type FetchCartOptions = {
+  /**
+   * When true, an empty `GET /cart` overwrites a non-empty local cart (e.g. order just completed).
+   * Default false: retry once and otherwise keep the last known cart when Woo briefly returns empty.
+   */
+  acceptEmptyWhenHadItems?: boolean;
+};
+
 type CartStoreActions = {
   setDrawerOpen: (open: boolean) => void;
   openCart: () => void;
   closeCart: () => void;
-  fetchCart: () => Promise<void>;
+  fetchCart: (options?: FetchCartOptions) => Promise<void>;
   ensureCartLoaded: () => Promise<void>;
   addItem: (productId: number) => Promise<void>;
   updateItemQuantity: (key: string, quantity: number, productId?: number) => Promise<void>;
@@ -58,6 +66,38 @@ export function getCartItemsCount(cart: CartResponse | null): number {
   return fromLines;
 }
 
+function cloneCart(cart: CartResponse): CartResponse {
+  return structuredClone(cart);
+}
+
+/** When the line already exists (same product id), bump qty locally until the server responds. */
+function optimisticIncrementLineForProduct(cart: CartResponse, productId: number): CartResponse | null {
+  const line = cart.items.find((i) => i.id === productId);
+  if (!line) {
+    return null;
+  }
+  return {
+    ...cart,
+    items: cart.items.map((i) =>
+      i.key === line.key ? { ...i, quantity: i.quantity + 1 } : i,
+    ),
+  };
+}
+
+function optimisticSetLineQuantity(cart: CartResponse, key: string, quantity: number): CartResponse {
+  return {
+    ...cart,
+    items: cart.items.map((i) => (i.key === key ? { ...i, quantity } : i)),
+  };
+}
+
+function optimisticRemoveLine(cart: CartResponse, key: string): CartResponse {
+  return {
+    ...cart,
+    items: cart.items.filter((i) => i.key !== key),
+  };
+}
+
 export const useCartStore = create<CartStore>((set, get) => ({
   drawerOpen: false,
   cart: null,
@@ -70,13 +110,31 @@ export const useCartStore = create<CartStore>((set, get) => ({
   openCart: () => set({ drawerOpen: true }),
   closeCart: () => set({ drawerOpen: false }),
 
-  fetchCart: async () => {
-    const hadCart = get().cart !== null;
-    if (!hadCart) {
+  fetchCart: async (options) => {
+    const snapshot = get().cart;
+    const acceptEmpty = options?.acceptEmptyWhenHadItems === true;
+    const prevCount = getCartItemsCount(snapshot);
+    const hadCartState = snapshot !== null;
+    if (!hadCartState) {
       set({ status: "loading", error: null });
     }
     try {
-      const cart = await getCart();
+      let cart = await getCart();
+      let newCount = getCartItemsCount(cart);
+
+      if (!acceptEmpty && prevCount > 0 && newCount === 0) {
+        await new Promise((r) => setTimeout(r, 200));
+        const retryCart = await getCart();
+        const retryCount = getCartItemsCount(retryCart);
+        if (retryCount > 0) {
+          cart = retryCart;
+          newCount = retryCount;
+        } else if (snapshot) {
+          set({ cart: snapshot, status: "ready", error: null });
+          return;
+        }
+      }
+
       set({ cart, status: "ready", error: null });
     } catch (e) {
       set({
@@ -102,12 +160,25 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   addItem: async (productId) => {
     await get().ensureCartLoaded();
+    const cartBefore = get().cart;
+    const snapshot = cartBefore !== null ? cloneCart(cartBefore) : null;
     set({ mutatingProductId: productId, error: null });
+    if (snapshot) {
+      const optimistic = optimisticIncrementLineForProduct(snapshot, productId);
+      if (optimistic) {
+        set({ cart: optimistic, status: "ready" });
+      }
+    }
     try {
       const cart = await addToCartRequest(productId);
       set({ cart, status: "ready", error: null });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      const message = e instanceof Error ? e.message : "Unknown error";
+      if (snapshot) {
+        set({ cart: snapshot, status: "ready", error: message });
+      } else {
+        set({ error: message });
+      }
       throw e;
     } finally {
       set({ mutatingProductId: null });
@@ -117,12 +188,22 @@ export const useCartStore = create<CartStore>((set, get) => ({
   updateItemQuantity: async (key, quantity, productId) => {
     await get().ensureCartLoaded();
     const fromCart = get().cart?.items.find((i) => i.key === key)?.id;
+    const cartBefore = get().cart;
+    const snapshot = cartBefore !== null ? cloneCart(cartBefore) : null;
     set({ mutatingProductId: productId ?? fromCart ?? null, error: null });
+    if (snapshot) {
+      set({ cart: optimisticSetLineQuantity(snapshot, key, quantity), status: "ready" });
+    }
     try {
       const cart = await setCartItemQuantityRequest(key, quantity);
       set({ cart, status: "ready", error: null });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      const message = e instanceof Error ? e.message : "Unknown error";
+      if (snapshot) {
+        set({ cart: snapshot, status: "ready", error: message });
+      } else {
+        set({ error: message });
+      }
       throw e;
     } finally {
       set({ mutatingProductId: null });
@@ -132,12 +213,22 @@ export const useCartStore = create<CartStore>((set, get) => ({
   removeItem: async (key, productId) => {
     await get().ensureCartLoaded();
     const fromCart = get().cart?.items.find((i) => i.key === key)?.id;
+    const cartBefore = get().cart;
+    const snapshot = cartBefore !== null ? cloneCart(cartBefore) : null;
     set({ mutatingProductId: productId ?? fromCart ?? null, error: null });
+    if (snapshot) {
+      set({ cart: optimisticRemoveLine(snapshot, key), status: "ready" });
+    }
     try {
       const cart = await removeCartItemRequest(key);
       set({ cart, status: "ready", error: null });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : "Unknown error" });
+      const message = e instanceof Error ? e.message : "Unknown error";
+      if (snapshot) {
+        set({ cart: snapshot, status: "ready", error: message });
+      } else {
+        set({ error: message });
+      }
       throw e;
     } finally {
       set({ mutatingProductId: null });
@@ -189,7 +280,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
         window.location.assign(redirect);
         return result;
       }
-      await get().fetchCart();
+      await get().fetchCart({ acceptEmptyWhenHadItems: true });
       return result;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";

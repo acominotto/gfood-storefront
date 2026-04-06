@@ -1,20 +1,23 @@
-import { revalidateTag } from "next/cache";
-import { createWooClient } from "@/server/woo-client";
+import { HTTPError } from "ky";
+import { ZodError } from "zod";
+import { formatWooHttpError } from "@/lib/woo-http-error";
 import { jsonError, jsonOk } from "@/server/api-response";
-import { buildProductSearchParams, parseProductsQuery } from "@/server/catalog";
-import { productListSchema } from "@/server/schemas/catalog";
+import { fetchCachedCatalogProductList } from "@/server/cached-catalog-product-list";
+import { parseProductsQuery } from "@/server/parse-products-query";
+import type { ProductsQuery } from "@/server/schemas/catalog";
 
 export async function GET(request: Request) {
+  const url = new URL(request.url);
+  let query: ProductsQuery;
   try {
-    const url = new URL(request.url);
-    const query = parseProductsQuery(url.searchParams);
-    const woo = createWooClient();
+    query = parseProductsQuery(url.searchParams);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid query parameters";
+    return jsonError(400, message);
+  }
 
-    const requestPath = `products?${buildProductSearchParams(query).toString()}`;
-    const response = await woo.get(requestPath);
-    const products = productListSchema.parse(await response.json());
-
-    revalidateTag("catalog-products", "max");
+  try {
+    const { products, total, totalPages } = await fetchCachedCatalogProductList(query);
 
     return jsonOk(
       {
@@ -22,8 +25,8 @@ export async function GET(request: Request) {
         pagination: {
           page: query.page,
           perPage: query.perPage,
-          total: Number(response.headers.get("x-wp-total") ?? 0),
-          totalPages: Number(response.headers.get("x-wp-totalpages") ?? 0),
+          total,
+          totalPages,
         },
       },
       {
@@ -33,6 +36,18 @@ export async function GET(request: Request) {
       },
     );
   } catch (error) {
-    return jsonError(400, error instanceof Error ? error.message : "Unable to load products");
+    if (error instanceof ZodError) {
+      return jsonError(
+        502,
+        "Product payload from the store did not match the expected shape. Check server logs or relax schema if Woo changed.",
+      );
+    }
+    if (error instanceof HTTPError) {
+      const message = await formatWooHttpError(error);
+      const upstream = error.response.status;
+      const status = upstream >= 500 ? upstream : 502;
+      return jsonError(status, message);
+    }
+    return jsonError(500, error instanceof Error ? error.message : "Unable to load products");
   }
 }

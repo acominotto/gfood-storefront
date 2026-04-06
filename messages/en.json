@@ -3,6 +3,7 @@
     "catalog": "Shop",
     "delivery": "Delivery",
     "login": "Login",
+    "register": "Register",
     "cart": "Cart",
     "items": "items",
     "total": "Total",
@@ -44,7 +45,21 @@
     "breadcrumbHome": "Home",
     "promoBadge": "Under construction",
     "promoTitle": "Promotions",
-    "promoDescription": "Offers and featured products will show up here soon."
+    "promoDescription": "Offers and featured products will show up here soon.",
+    "origineSectionTitle": "Origin",
+    "origineFilterLabel": "Origin",
+    "origineFilterAria": "Filter by origin (multi-select)",
+    "origineFilterHint": "Show products matching any selected origin.",
+    "origineFilterLoading": "Loading origins…",
+    "origineFilterEmpty": "No origin options found. Check `pa_origine` in WooCommerce and `src/lib/woo-origine-regime.ts`.",
+    "origineClear": "Clear origin filters",
+    "regimeSectionTitle": "Diet (régime)",
+    "regimeFilterLabel": "Régime",
+    "regimeFilterAria": "Filter by diet / régime (multi-select)",
+    "regimeFilterHint": "Show products matching any selected régime.",
+    "regimeFilterLoading": "Loading régime options…",
+    "regimeFilterEmpty": "No régime options found. Check `pa_regime` in WooCommerce and `src/lib/woo-origine-regime.ts`.",
+    "regimeClear": "Clear régime filters"
   },
   "checkout": {
     "title": "Checkout",
@@ -77,7 +92,10 @@
     "promoApply": "Apply",
     "promoRemove": "Remove",
     "promoApplying": "Applying…",
-    "promoUnknown": "Something went wrong"
+    "promoUnknown": "Something went wrong",
+    "haveAccount": "Already have an account?",
+    "signInForCheckout": "Sign in to use your saved details and link this order to your account.",
+    "signedInAs": "Signed in as {email}"
   },
   "delivery": {
     "title": "Delivery",
@@ -106,7 +124,25 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "google": "Continue with Google",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "registerMetaTitle": "Create an account | G-Food",
+    "registerMetaDescription": "Create your G-Food account to sign in faster at checkout.",
+    "registerTitle": "Create an account",
+    "registerSubtitle": "Use your e-mail and a password. You can sign in on this shop right away.",
+    "registerEmail": "E-mail",
+    "registerNameOptional": "Name (optional)",
+    "registerPasswordHint": "At least 8 characters.",
+    "registerConfirmPassword": "Confirm password",
+    "registerSubmit": "Create account",
+    "registerPasswordMismatch": "Passwords do not match.",
+    "registerErrorEmailExists": "An account with this e-mail already exists. Sign in instead.",
+    "registerErrorGeneric": "Registration failed. Please try again.",
+    "registerErrorValidation": "Check your e-mail and password and try again.",
+    "registerErrorSignInAfter": "Account created, but sign-in failed. Try signing in manually.",
+    "registerErrorRateLimit": "Too many attempts. Please wait a minute and try again.",
+    "registerHaveAccount": "Already have an account?",
+    "securityOriginRejected": "We could not verify this request came from our shop. Use the same address you see in the browser bar, or refresh the page and try again.",
+    "registerErrorWpSync": "We could not create your account right now because the shop cannot talk to the site backend. Please try again later or contact us."
   },
   "footer": {
     "impressum": "Legal notice"

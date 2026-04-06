@@ -3,41 +3,89 @@
 import { useEffect, useRef, useState } from "react";
 
 type UseScrollRevealBarOptions = {
-  /** Minimum scroll delta (px) to treat as intentional direction change */
-  delta?: number;
+  /**
+   * How much the user must scroll in one direction (accumulated across slow
+   * scroll events) before toggling visibility. Larger values reduce flicker.
+   */
+  threshold?: number;
   /** While scrollY is at or below this value, the bar stays visible */
   scrollTopAlwaysVisible?: number;
+  /**
+   * After showing or hiding, ignore further visibility toggles for this long so
+   * layout / scroll anchoring cannot bounce the bar back immediately.
+   */
+  toggleCooldownMs?: number;
 };
 
 /**
  * Hide on scroll down, show on scroll up (and when near top of page).
  */
 export function useScrollRevealBar(options: UseScrollRevealBarOptions = {}) {
-  const { delta = 8, scrollTopAlwaysVisible = 32 } = options;
+  const { threshold = 18, scrollTopAlwaysVisible = 32, toggleCooldownMs = 280 } = options;
   const [visible, setVisible] = useState(true);
   const lastY = useRef(0);
   const frame = useRef<number | null>(null);
+  const accumulated = useRef(0);
+  const cooldownUntil = useRef(0);
 
   useEffect(() => {
     lastY.current = window.scrollY;
+    accumulated.current = 0;
 
     const onScroll = () => {
       if (frame.current != null) return;
       frame.current = requestAnimationFrame(() => {
         frame.current = null;
         const y = window.scrollY;
+        const now = performance.now();
+
         if (y <= scrollTopAlwaysVisible) {
           setVisible(true);
           lastY.current = y;
+          accumulated.current = 0;
+          cooldownUntil.current = 0;
           return;
         }
-        const dy = y - lastY.current;
-        if (dy > delta) {
-          setVisible(false);
-        } else if (dy < -delta) {
-          setVisible(true);
+
+        if (now < cooldownUntil.current) {
+          lastY.current = y;
+          accumulated.current = 0;
+          return;
         }
+
+        const dy = y - lastY.current;
         lastY.current = y;
+
+        if (Math.abs(dy) < 0.5) {
+          return;
+        }
+
+        if (accumulated.current !== 0 && Math.sign(dy) !== Math.sign(accumulated.current)) {
+          accumulated.current = 0;
+        }
+        accumulated.current += dy;
+
+        if (accumulated.current > threshold) {
+          setVisible((prev) => {
+            accumulated.current = 0;
+            if (!prev) {
+              return prev;
+            }
+            cooldownUntil.current = now + toggleCooldownMs;
+            return false;
+          });
+          return;
+        }
+        if (accumulated.current < -threshold) {
+          setVisible((prev) => {
+            accumulated.current = 0;
+            if (prev) {
+              return prev;
+            }
+            cooldownUntil.current = now + toggleCooldownMs;
+            return true;
+          });
+        }
       });
     };
 
@@ -48,7 +96,7 @@ export function useScrollRevealBar(options: UseScrollRevealBarOptions = {}) {
         cancelAnimationFrame(frame.current);
       }
     };
-  }, [delta, scrollTopAlwaysVisible]);
+  }, [threshold, scrollTopAlwaysVisible, toggleCooldownMs]);
 
   return visible;
 }

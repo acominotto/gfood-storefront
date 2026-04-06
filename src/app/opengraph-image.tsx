@@ -186,7 +186,7 @@ export default async function Image() {
               letterSpacing: "0.08em",
             }}
           >
-            Commander en ligne
+            Commander
           </span>
         </div>
       </div>

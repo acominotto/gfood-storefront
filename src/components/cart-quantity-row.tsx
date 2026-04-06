@@ -31,7 +31,7 @@ export function CartQuantityRow({
   onRemove,
   removeAriaLabel,
 }: CartQuantityRowProps) {
-  const btnSize = dense ? "xs" : "sm";
+  const btnSize = dense ? "2xs" : "sm";
   const gap = tight ? 0 : dense ? 1 : 2;
   const qtyMinW = tight ? "14px" : dense ? "18px" : "24px";
   const qtyFontSize = tight ? "2xs" : dense ? "xs" : undefined;

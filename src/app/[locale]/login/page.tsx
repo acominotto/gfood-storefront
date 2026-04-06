@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth-options";
-import { getWpAccountUrls } from "@/server/wp-auth";
+import { getWooAccountLostPasswordUrl } from "@/server/wp-auth";
 import { LoginView } from "./login-view";
 
 type PageProps = {
@@ -37,7 +37,5 @@ export default async function LoginPage({ params, searchParams }: PageProps) {
     redirect(returnTo);
   }
 
-  const { lostPassword, register } = getWpAccountUrls();
-
-  return <LoginView returnTo={returnTo} lostPasswordUrl={lostPassword} registerUrl={register} />;
+  return <LoginView returnTo={returnTo} lostPasswordUrl={getWooAccountLostPasswordUrl()} />;
 }

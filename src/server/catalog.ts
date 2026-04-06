@@ -1,24 +1,11 @@
-import { productsQuerySchema, type ProductsQuery } from "@/server/schemas/catalog";
+import {
+  WOO_ORIGINE_ATTRIBUTE_TAXONOMY,
+  WOO_REGIME_DIET_ATTRIBUTE_TAXONOMY,
+} from "@/lib/woo-origine-regime";
+import type { ProductsQuery } from "@/server/schemas/catalog";
+import { appendStoreApiAttributeFilters } from "@/server/store-api-product-filters";
 
-export function parseProductsQuery(input: URLSearchParams) {
-  const parsed = productsQuerySchema.safeParse({
-    search: input.get("search") ?? undefined,
-    category: input.get("category") ?? undefined,
-    minPrice: input.get("minPrice") ?? undefined,
-    maxPrice: input.get("maxPrice") ?? undefined,
-    inStock: input.get("inStock") ?? undefined,
-    page: input.get("page") ?? undefined,
-    perPage: input.get("perPage") ?? undefined,
-    orderBy: input.get("orderBy") ?? undefined,
-    order: input.get("order") ?? undefined,
-  });
-
-  if (!parsed.success) {
-    throw new Error(parsed.error.message);
-  }
-
-  return parsed.data;
-}
+export { parseProductsQuery } from "@/server/parse-products-query";
 
 export function buildProductSearchParams(query: ProductsQuery) {
   const params = new URLSearchParams({
@@ -43,6 +30,11 @@ export function buildProductSearchParams(query: ProductsQuery) {
   if (query.inStock) {
     params.set("stock_status", "instock");
   }
+
+  appendStoreApiAttributeFilters(params, [
+    { taxonomy: WOO_ORIGINE_ATTRIBUTE_TAXONOMY, slugs: query.origine ?? [] },
+    { taxonomy: WOO_REGIME_DIET_ATTRIBUTE_TAXONOMY, slugs: query.regime ?? [] },
+  ]);
 
   return params;
 }

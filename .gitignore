@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
 
 # next.js
 /.next/
@@ -19,6 +21,9 @@
 
 # production
 /build
+
+# local Woo export (pnpm woo:fetch-sanitized-images)
+/woocommerce-sanitized-images/
 
 # misc
 .DS_Store
@@ -39,3 +44,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/scripts/.gfood-translate-cache.sqlite
+scripts/.venv-gfood/

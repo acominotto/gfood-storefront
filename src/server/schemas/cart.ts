@@ -24,6 +24,8 @@ export const cartItemSchema = z.object({
   id: z.coerce.number(),
   quantity: z.coerce.number(),
   name: z.string(),
+  /** WooCommerce Store API — used to build `/p/{id}-{slug}` links in cart UI. */
+  permalink: z.string().optional(),
   images: z
     .array(
       z

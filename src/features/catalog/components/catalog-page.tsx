@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { CatalogPromoPlaceholder } from "@/features/catalog/components/catalog-promo-placeholder";
 import { CatalogFilterBar } from "@/features/catalog/components/filters";
@@ -12,12 +13,21 @@ import { useSyncCatalogSearchToUrl } from "@/features/catalog/hooks/use-sync-cat
 import { selectHasNextPage, useProductsStore } from "@/features/catalog/store/products-store";
 import { useSyncCatalogProducts } from "@/features/catalog/store/use-sync-catalog-products";
 import { useScrollRevealBar } from "@/hooks/use-scroll-reveal-bar";
-import { useNavbarStore } from "@/stores/navbar-store";
 import { useStorefrontTopNavHeight } from "@/hooks/use-storefront-top-nav-height";
 import { MOBILE_FLOAT_ABOVE_NAV_BOTTOM } from "@/lib/mobile-bottom-chrome";
 import type { Product } from "@/server/schemas/catalog";
-import { Button } from "@/components/ui/button";
-import { Box, Flex, HStack, Pagination, Spinner, Stack, Text, useBreakpointValue } from "@chakra-ui/react";
+import { useNavbarStore } from "@/stores/navbar-store";
+import {
+  Box,
+  Flex,
+  HStack,
+  Pagination,
+  Skeleton,
+  Spinner,
+  Stack,
+  Text,
+  useBreakpointValue,
+} from "@chakra-ui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
@@ -38,6 +48,37 @@ function catalogColumnsForContainerWidth(widthPx: number) {
   const cell = CATALOG_CARD_WIDTH_PX + CATALOG_COLUMN_GAP_PX;
   const n = Math.floor((widthPx + CATALOG_COLUMN_GAP_PX) / cell);
   return Math.max(1, Math.min(MAX_CATALOG_COLUMNS, n));
+}
+
+function CatalogProductGridSkeleton({
+  columnCount,
+  rows,
+}: {
+  columnCount: number;
+  rows: number;
+}) {
+  const cellCount = Math.min(48, Math.max(1, columnCount * rows));
+  return (
+    <Box w="full" minW={0}>
+      <Box
+        display="grid"
+        w="full"
+        minW={0}
+        justifyContent="center"
+        columnGap={`${CATALOG_COLUMN_GAP_PX}px`}
+        rowGap={`${CATALOG_ROW_GAP_PX}px`}
+        gridTemplateColumns={`repeat(auto-fill, ${CATALOG_CARD_WIDTH_PX}px)`}
+      >
+        {Array.from({ length: cellCount }, (_, i) => (
+          <Stack key={i} gap={2} w={`${CATALOG_CARD_WIDTH_PX}px`}>
+            <Skeleton height="200px" borderRadius="md" />
+            <Skeleton height="14px" />
+            <Skeleton height="14px" width="65%" />
+          </Stack>
+        ))}
+      </Box>
+    </Box>
+  );
 }
 
 const MOBILE_CHROME_BOTTOM = MOBILE_FLOAT_ABOVE_NAV_BOTTOM;
@@ -149,7 +190,6 @@ export function CatalogPage() {
         h={`${spacerHeight}px`}
         minH={0}
         overflow="hidden"
-        transition="height 0.22s ease"
         aria-hidden
         flexShrink={0}
       />
@@ -158,9 +198,12 @@ export function CatalogPage() {
 
       <Stack gap={6} minW={0} w="full">
         {productsStatus === "loading" && pages.length === 0 ? (
-          <Flex justify="center" py={12}>
-            <Spinner />
-          </Flex>
+          <Stack gap={4} py={{ base: 6, md: 8 }}>
+            <CatalogProductGridSkeleton columnCount={columnCount} rows={ROWS_PER_CATALOG_PAGE} />
+            <Flex justify="center">
+              <Spinner size="sm" color="gray.400" />
+            </Flex>
+          </Stack>
         ) : productsStatus === "error" ? (
           <Text color="red.600">{productsError ?? t("noResults")}</Text>
         ) : (

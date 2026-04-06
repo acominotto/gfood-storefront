@@ -1,16 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Box,
-  Card,
-  HStack,
-  IconButton,
-  Input,
-  Link as ChakraLink,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Card, HStack, IconButton, Input, Link as ChakraLink, Stack, Text } from "@chakra-ui/react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -23,10 +14,9 @@ import { NextIntlLink } from "@/i18n/navigation";
 type Props = {
   returnTo: string;
   lostPasswordUrl: string;
-  registerUrl: string;
 };
 
-export function LoginView({ returnTo, lostPasswordUrl, registerUrl }: Props) {
+export function LoginView({ returnTo, lostPasswordUrl }: Props) {
   const t = useTranslations("auth");
   const router = useRouter();
   const [identifier, setIdentifier] = useState("");
@@ -200,16 +190,11 @@ export function LoginView({ returnTo, lostPasswordUrl, registerUrl }: Props) {
             <Stack gap={2} pt={1} align="center">
               <Text fontSize="sm" color="fg.muted" textAlign="center">
                 {t("noAccount")}{" "}
-                <ChakraLink
-                  href={registerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color="brand.fg"
-                  fontWeight="medium"
-                  textDecoration="underline"
-                >
-                  {t("createAccount")}
-                </ChakraLink>
+                <NextIntlLink href={{ pathname: "/register", query: { callbackUrl: returnTo } }}>
+                  <Text as="span" color="brand.fg" fontWeight="medium" textDecoration="underline">
+                    {t("createAccount")}
+                  </Text>
+                </NextIntlLink>
               </Text>
               <NextIntlLink href="/">
                 <Text as="span" fontSize="sm" color="fg.muted" textDecoration="underline">

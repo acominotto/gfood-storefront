@@ -7,9 +7,11 @@ import type { CheckoutPayload } from "@/features/catalog/api";
 import { getCheckout, putCheckout } from "@/features/catalog/api";
 import { CartDeliveryLine } from "@/components/cart-delivery-line";
 import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
+import { productHrefFromCartLineItem } from "@/lib/product-url";
 import type { CheckoutOrderResult, StoreApiAddress } from "@/server/schemas/cart";
 import { Box, Card, Checkbox, Grid, HStack, Input, Stack, Text, Textarea } from "@chakra-ui/react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type BillingForm = {
@@ -179,6 +181,7 @@ export function CheckoutPage() {
   const t = useTranslations("checkout");
   const tNav = useTranslations("nav");
   const locale = useLocale();
+  const { data: session, status: sessionStatus } = useSession();
   const [billing, setBilling] = useState<BillingForm>(billingDefaults);
   const [shipping, setShipping] = useState<ShippingForm>(shippingDefaults);
   const [sameShippingAsBilling, setSameShippingAsBilling] = useState(true);
@@ -202,6 +205,8 @@ export function CheckoutPage() {
   const checkoutError = useCartStore((s) => s.checkoutError);
 
   const paymentInitRef = useRef(false);
+  /** Drops stale bootstrap work when React Strict Mode or auth re-runs overlap async steps. */
+  const bootstrapGenRef = useRef(0);
 
   const applyPromo = useCallback(async () => {
     const code = promoCode.trim();
@@ -218,11 +223,23 @@ export function CheckoutPage() {
   }, [applyCoupon, promoCode, t]);
 
   const loadBootstrap = useCallback(async () => {
+    const gen = ++bootstrapGenRef.current;
+    const stale = () => gen !== bootstrapGenRef.current;
+
     await ensureCartLoaded();
+    if (stale()) {
+      return;
+    }
     await fetchCart();
+    if (stale()) {
+      return;
+    }
     const cartAfterInitialFetch = useCartStore.getState().cart;
     try {
       const draft = await getCheckout();
+      if (stale()) {
+        return;
+      }
       setBilling((b) => mergeStoreAddress(b, draft.billing_address));
       setShipping((s) => mergeShippingStore(s, draft.shipping_address));
       if (draft.customer_note) {
@@ -235,7 +252,13 @@ export function CheckoutPage() {
     } catch {
       /* no draft / guest — rely on cart addresses below */
     }
+    if (stale()) {
+      return;
+    }
     await fetchCart();
+    if (stale()) {
+      return;
+    }
     const hadItems = getCartItemsCount(cartAfterInitialFetch) > 0;
     let latest = useCartStore.getState().cart;
     if (hadItems && getCartItemsCount(latest) === 0 && cartAfterInitialFetch) {
@@ -249,12 +272,22 @@ export function CheckoutPage() {
     if (latest?.shipping_address) {
       setShipping((s) => mergeShippingStore(s, latest.shipping_address));
     }
-    setBootstrapDone(true);
+    if (!stale()) {
+      setBootstrapDone(true);
+    }
   }, [ensureCartLoaded, fetchCart]);
 
   useEffect(() => {
     void loadBootstrap();
   }, [loadBootstrap]);
+
+  const prevSessionStatus = useRef(sessionStatus);
+  useEffect(() => {
+    if (prevSessionStatus.current !== "authenticated" && sessionStatus === "authenticated") {
+      void loadBootstrap();
+    }
+    prevSessionStatus.current = sessionStatus;
+  }, [sessionStatus, loadBootstrap]);
 
   useEffect(() => {
     if (!cart?.payment_methods?.length) {
@@ -273,6 +306,14 @@ export function CheckoutPage() {
   const itemCount = getCartItemsCount(cart);
   const cartReady = bootstrapDone && status !== "loading";
   const emptyCart = cartReady && itemCount === 0;
+
+  const checkoutReturnPath = `/${locale}/checkout`;
+  const loginHref = { pathname: "/login" as const, query: { callbackUrl: checkoutReturnPath } };
+  const registerHref = { pathname: "/register" as const, query: { callbackUrl: checkoutReturnPath } };
+  const signedInLabel =
+    session?.user?.email?.trim() ||
+    session?.user?.name?.trim() ||
+    null;
 
   async function onSubmit() {
     const needsPay = cart?.needs_payment !== false;
@@ -371,6 +412,33 @@ export function CheckoutPage() {
         </Card.Header>
         <Card.Body>
           <Stack gap={4}>
+            {sessionStatus === "unauthenticated" ? (
+              <Box rounded="md" borderWidth="1px" borderColor="gray.200" bg="gray.50" px={4} py={3}>
+                <Stack gap={2}>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {t("haveAccount")}
+                  </Text>
+                  <Text fontSize="sm" color="fg.muted">
+                    {t("signInForCheckout")}
+                  </Text>
+                  <HStack gap={4} flexWrap="wrap">
+                    <Link href={loginHref} fontWeight="medium">
+                      {tNav("login")}
+                    </Link>
+                    <Link href={registerHref} fontWeight="medium">
+                      {tNav("register")}
+                    </Link>
+                  </HStack>
+                </Stack>
+              </Box>
+            ) : null}
+            {sessionStatus === "authenticated" && signedInLabel ? (
+              <Box rounded="md" borderWidth="1px" borderColor="brand.200" bg="brand.50" px={4} py={3}>
+                <Text fontSize="sm" color="fg.muted">
+                  {t("signedInAs", { email: signedInLabel })}
+                </Text>
+              </Box>
+            ) : null}
             <Text fontWeight="semibold">{t("billing")}</Text>
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={3}>
               <Input
@@ -576,14 +644,23 @@ export function CheckoutPage() {
           <Text fontWeight="semibold">{tNav("cart")}</Text>
         </Card.Header>
         <Card.Body>
-          {cart?.items?.map((item) => (
+          {cart?.items?.map((item) => {
+            const href = productHrefFromCartLineItem(item);
+            return (
             <Box key={item.key} py={2}>
-              <Text>{item.name}</Text>
+              {href ? (
+                <Link href={href} variant="plain" _hover={{ textDecoration: "underline" }}>
+                  {item.name}
+                </Link>
+              ) : (
+                <Text>{item.name}</Text>
+              )}
               <Text fontSize="sm" color="fg.muted">
                 Qty: {item.quantity}
               </Text>
             </Box>
-          ))}
+            );
+          })}
           {cart?.fees?.map((fee) => (
             <CheckoutFeeRow key={fee.key} fee={fee} cartCurrency={cart?.totals?.currency_code} />
           ))}

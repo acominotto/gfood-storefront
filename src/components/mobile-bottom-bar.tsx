@@ -119,11 +119,18 @@ export function MobileBottomBar() {
               <Separator />
 
               {!session ? (
-                <Button asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
-                  <Link href="/login" onClick={() => setMenuOpen(false)}>
-                    {tNav("login")}
-                  </Link>
-                </Button>
+                <>
+                  <Button asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
+                    <Link href="/login" onClick={() => setMenuOpen(false)}>
+                      {tNav("login")}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
+                    <Link href="/register" onClick={() => setMenuOpen(false)}>
+                      {tNav("register")}
+                    </Link>
+                  </Button>
+                </>
               ) : (
                 <>
                   {session.user?.email ? (

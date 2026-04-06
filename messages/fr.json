@@ -1,8 +1,9 @@
 {
   "nav": {
-    "catalog": "Commander en ligne",
+    "catalog": "Commander",
     "delivery": "Livraison",
     "login": "Connexion",
+    "register": "S'inscrire",
     "cart": "Panier",
     "items": "articles",
     "total": "Total",
@@ -44,7 +45,21 @@
     "breadcrumbHome": "Accueil",
     "promoBadge": "Travaux en cours",
     "promoTitle": "Promotions",
-    "promoDescription": "Les offres et produits vedettes s’afficheront bientôt ici."
+    "promoDescription": "Les offres et produits vedettes s’afficheront bientôt ici.",
+    "origineSectionTitle": "Origine",
+    "origineFilterLabel": "Origine",
+    "origineFilterAria": "Filtrer par origine (multi-sélection)",
+    "origineFilterHint": "Afficher les produits correspondant à au moins une origine.",
+    "origineFilterLoading": "Chargement des origines…",
+    "origineFilterEmpty": "Aucune origine trouvée. Vérifiez `pa_origine` dans WooCommerce et `src/lib/woo-origine-regime.ts`.",
+    "origineClear": "Effacer les filtres origine",
+    "regimeSectionTitle": "Régime",
+    "regimeFilterLabel": "Régime",
+    "regimeFilterAria": "Filtrer par régime alimentaire (multi-sélection)",
+    "regimeFilterHint": "Afficher les produits correspondant à au moins un régime.",
+    "regimeFilterLoading": "Chargement des régimes…",
+    "regimeFilterEmpty": "Aucun régime trouvé. Vérifiez `pa_regime` dans WooCommerce et `src/lib/woo-origine-regime.ts`.",
+    "regimeClear": "Effacer les filtres régime"
   },
   "checkout": {
     "title": "Finaliser votre commande",
@@ -77,7 +92,10 @@
     "promoApply": "Appliquer",
     "promoRemove": "Retirer",
     "promoApplying": "Application…",
-    "promoUnknown": "Une erreur s’est produite"
+    "promoUnknown": "Une erreur s’est produite",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "signInForCheckout": "Connectez-vous pour utiliser vos informations enregistrées et associer cette commande à votre compte.",
+    "signedInAs": "Connecté(e) en tant que {email}"
   },
   "delivery": {
     "title": "Livraison",
@@ -106,7 +124,25 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "google": "Continuer avec Google",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "registerMetaTitle": "Créer un compte | G-Food",
+    "registerMetaDescription": "Créez votre compte G-Food pour vous connecter plus vite au paiement.",
+    "registerTitle": "Créer un compte",
+    "registerSubtitle": "Utilisez votre e-mail et un mot de passe. Vous pourrez vous connecter sur cette boutique tout de suite.",
+    "registerEmail": "E-mail",
+    "registerNameOptional": "Nom (facultatif)",
+    "registerPasswordHint": "Au moins 8 caractères.",
+    "registerConfirmPassword": "Confirmer le mot de passe",
+    "registerSubmit": "Créer le compte",
+    "registerPasswordMismatch": "Les mots de passe ne correspondent pas.",
+    "registerErrorEmailExists": "Un compte avec cet e-mail existe déjà. Connectez-vous plutôt.",
+    "registerErrorGeneric": "L'inscription a échoué. Veuillez réessayer.",
+    "registerErrorValidation": "Vérifiez votre e-mail et votre mot de passe, puis réessayez.",
+    "registerErrorSignInAfter": "Compte créé, mais la connexion a échoué. Essayez de vous connecter manuellement.",
+    "registerErrorRateLimit": "Trop de tentatives. Attendez une minute puis réessayez.",
+    "registerHaveAccount": "Vous avez déjà un compte ?",
+    "securityOriginRejected": "Nous n’avons pas pu vérifier que cette demande provient de notre boutique. Utilisez la même adresse que dans la barre du navigateur, ou actualisez la page et réessayez.",
+    "registerErrorWpSync": "Nous n’avons pas pu créer votre compte : la boutique n’a pas pu joindre le site principal. Réessayez plus tard ou contactez-nous."
   },
   "footer": {
     "impressum": "Impressum"

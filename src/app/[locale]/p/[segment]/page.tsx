@@ -10,6 +10,7 @@ import { openGraphForLocale, siteName } from "@/lib/site-metadata";
 import { routing } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { fetchProductById } from "@/server/product-catalog";
+import { productOrigineAndRegimeTerms } from "@/server/regime-attribute";
 import type { Product } from "@/server/schemas/catalog";
 import { getAllProductCategories } from "@/server/woo-taxonomies";
 
@@ -134,7 +135,10 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  const product = await fetchProductById(parsed.id);
+  const [product, categories] = await Promise.all([
+    fetchProductById(parsed.id),
+    getAllProductCategories(),
+  ]);
   if (!product) {
     notFound();
   }
@@ -144,7 +148,7 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const jsonLd = buildProductJsonLd(locale, product);
-  const categories = await getAllProductCategories();
+  const { origine: origineTerms, regime: regimeTerms } = productOrigineAndRegimeTerms(product);
 
   return (
     <>
@@ -153,7 +157,13 @@ export default async function ProductPage({ params }: Props) {
         // JSON-LD: product fields come from validated Woo payload
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetailView product={product} locale={locale} categories={categories} />
+      <ProductDetailView
+        product={product}
+        locale={locale}
+        categories={categories}
+        origineTerms={origineTerms}
+        regimeTerms={regimeTerms}
+      />
     </>
   );
 }
