@@ -3,9 +3,11 @@
 import { CartDeliveryLine } from "@/components/cart-delivery-line";
 import { CartDrawerCartItem } from "@/components/cart-drawer-cart-item";
 import { CartDrawerFeeLine } from "@/components/cart-drawer-fee-line";
+import { FreeShippingProgress } from "@/features/cart/components/free-shipping-progress";
 import { getCartItemsCount, useCartStore } from "@/features/cart/store/cart-store";
 import { formatCartMoney } from "@/lib/cart-format";
 import {
+  Box,
   Button,
   EmptyState,
   Flex,
@@ -53,6 +55,12 @@ export function CartDrawer() {
         </Drawer.Header>
 
         <Drawer.Body>
+          {!showInitialSpinner && cart && cartItems.length > 0 ? (
+            <Box pb={3}>
+              <FreeShippingProgress />
+            </Box>
+          ) : null}
+
           {showInitialSpinner ? (
             <Flex gap={2} align="center" py={8} justify="center">
               <Spinner size="sm" />

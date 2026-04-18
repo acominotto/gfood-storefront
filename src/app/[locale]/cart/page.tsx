@@ -3,6 +3,7 @@
 import { CartDeliveryLine } from "@/components/cart-delivery-line";
 import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { Link } from "@/components/ui/link";
+import { FreeShippingProgress } from "@/features/cart/components/free-shipping-progress";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { productHrefFromCartLineItem } from "@/lib/product-url";
 import { formatCartMoney, type CartFeeLine } from "@/lib/cart-format";
@@ -57,6 +58,7 @@ export default function CartPage() {
       </Card.Header>
       <Card.Body>
         <Stack gap={4}>
+          {(cart?.items?.length ?? 0) > 0 ? <FreeShippingProgress /> : null}
           {cart?.items?.map((item) => {
             const href = productHrefFromCartLineItem(item);
             return (

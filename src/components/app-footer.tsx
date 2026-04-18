@@ -1,7 +1,8 @@
 "use client";
 
 
-import { Box, Container, Flex, Text } from "@chakra-ui/react";
+import { CookieSettingsTrigger } from "@/features/cookie-consent/cookie-settings-trigger";
+import { Box, Container, Flex, HStack, Text } from "@chakra-ui/react";
 import { useTranslations } from "next-intl";
 import { Link } from "./ui/link";
 
@@ -21,11 +22,15 @@ export function AppFooter() {
           <Text fontSize="sm" color="gray.600">
             © {year} G-Food
           </Text>
-          <Link variant="underline" href="/impressum">
-
-            {t("impressum")}
-
-          </Link>
+          <HStack gap={{ base: 3, sm: 4 }} flexWrap="wrap" justify={{ base: "flex-start", sm: "flex-end" }}>
+            <Link variant="underline" href="/privacy">
+              {t("privacy")}
+            </Link>
+            <CookieSettingsTrigger />
+            <Link variant="underline" href="/impressum">
+              {t("impressum")}
+            </Link>
+          </HStack>
         </Flex>
       </Container>
     </Box>

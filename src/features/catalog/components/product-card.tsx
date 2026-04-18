@@ -4,6 +4,7 @@ import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { Link } from "@/components/ui/link";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
+import { ProductPrice } from "@/features/catalog/components/product-price";
 import { productPath } from "@/lib/product-url";
 import type { Product } from "@/server/schemas/catalog";
 import { Badge, Box, Card, HStack, IconButton, Image, Stack, Text } from "@chakra-ui/react";
@@ -15,14 +16,6 @@ type ProductCardProps = {
   locale: string;
   onOpenCart?: () => void;
 };
-
-function formatPrice(amount: string | undefined, locale: string) {
-  if (!amount) {
-    return "-";
-  }
-  const value = Number(amount) / 100;
-  return new Intl.NumberFormat(locale, { style: "currency", currency: "CHF" }).format(value);
-}
 
 function toPlainText(html: string | undefined) {
   if (!html) {
@@ -118,6 +111,7 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
         mt="-3"
         borderTopRadius="lg"
         bg="white"
+        boxShadow="0 -2px 6px rgba(235, 32, 39, 0.15)"
         overflow="hidden"
         flex="1"
         minH={0}
@@ -164,9 +158,7 @@ export function ProductCard({ product, locale, onOpenCart }: ProductCardProps) {
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          <Text fontWeight="bold" fontSize="sm" lineHeight="1.2" minW={0} lineClamp={1}>
-            {formatPrice(product.prices?.price, locale)}
-          </Text>
+          <ProductPrice product={product} locale={locale} size="sm" />
           <Box flexShrink={0}>
             {quantity > 0 ? (
               <CartQuantityRow

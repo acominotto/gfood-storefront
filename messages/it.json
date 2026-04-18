@@ -161,6 +161,8 @@
     "title": "Consegna",
     "intro": "Consegniamo in Svizzera. Tempi e zone possono variare; i dettagli saranno confermati al momento dell'ordine.",
     "freeFrom": "La consegna è gratuita per ordini da almeno {amount} CHF (IVA inclusa).",
+    "freeShippingMissing": "Mancano solo <strong>{amount}</strong> alla consegna gratuita",
+    "freeShippingUnlocked": "Consegna gratuita",
     "note": "Testo indicativo — condizioni definitive confermate al pagamento.",
     "close": "Chiudi"
   },
@@ -205,7 +207,24 @@
     "registerErrorWpSync": "Non è stato possibile creare l’account: il negozio non ha potuto contattare il sito principale. Riprova più tardi o contattaci."
   },
   "footer": {
-    "impressum": "Note legali"
+    "impressum": "Note legali",
+    "privacy": "Privacy",
+    "cookieSettings": "Impostazioni cookie"
+  },
+  "cookieConsent": {
+    "title": "Cookie e tecnologie simili",
+    "intro": "Usiamo cookie e archiviazione locale per il negozio, il carrello e—solo con il suo consenso—per statistiche e offerte rilevanti.",
+    "privacyLink": "Informativa sulla privacy e protezione dei dati",
+    "close": "Chiudi",
+    "necessaryOnly": "Solo necessari",
+    "saveChoices": "Salva scelte",
+    "acceptAll": "Accetta tutto",
+    "categoryNecessaryTitle": "Strettamente necessari",
+    "categoryNecessaryBody": "Necessari per le funzioni di base (sessione carrello, token di sicurezza, accesso se sceglie un account). Impostati senza consenso per marketing o analisi opzionali.",
+    "categoryAnalyticsTitle": "Statistiche / analisi",
+    "categoryAnalyticsBody": "Ci aiuta a capire come viene usato il sito. Caricato solo dopo il consenso.",
+    "categoryMarketingTitle": "Marketing",
+    "categoryMarketingBody": "Offerte personalizzate o remarketing da partner. Caricato solo dopo il consenso."
   },
   "impressum": {
     "metaTitle": "Note legali | G-Food",
@@ -227,5 +246,64 @@
     "contactFormUrl": "https://g-food.ch/contactez-nous/",
     "hoursLabel": "Orari",
     "hours": "Lunedì – venerdì: 08:00 – 17:00"
+  },
+  "privacy": {
+    "metaTitle": "Privacy | G-Food",
+    "metaDescription": "Informazioni sul trattamento dei dati personali e dei cookie in questo negozio da parte di CoFood Sàrl.",
+    "title": "Privacy e protezione dei dati",
+    "notLegalAdvice": "Questo testo è informativo e non sostituisce pareri legali; adeguarlo ai trattamenti effettivi e al diritto svizzero.",
+    "intro": "CoFood Sàrl («noi») gestisce questo negozio online. Trattiamo i dati personali conformemente alla Legge federale sulla protezione dei dati (LPD) e, quando cookie o tecnologie simili non sono strettamente necessari, alla Legge sulle telecomunicazioni (LTC). Il Incaricato federale della protezione dei dati e della trasparenza (IFPDT) pubblica orientamenti su cookie e tracciamento.",
+    "controllerTitle": "Titolare del trattamento",
+    "controllerBody": "CoFood Sàrl, Route de Vevey 130, CH-1630 Bulle. Contatti: vedi note legali.",
+    "purposesTitle": "Finalità",
+    "purposesBody": "Trattiamo dati per mostrare prodotti, gestire carrello e ordini, pagamenti tramite WooCommerce, account clienti, migliorare il servizio e—solo con consenso se richiesto—per analisi o marketing.",
+    "cookiesTitle": "Cookie e archiviazione simile",
+    "cookiesIntro": "La tabella elenca le tecnologie tipiche. I cookie di sessione necessari al negozio sono di regola considerati tecnicamente indispensabili; script di analisi o marketing opzionali si attivano solo dopo opt-in nel dialogo cookie.",
+    "cookieTableName": "Nome / chiave",
+    "cookieTablePurpose": "Finalità",
+    "cookieTableDuration": "Durata",
+    "cookieTableType": "Ambito",
+    "cookieRows": {
+      "cartToken": {
+        "name": "woo_cart_token",
+        "purpose": "Mantiene la sessione carrello WooCommerce Store API.",
+        "duration": "Fino a 7 giorni",
+        "type": "First party, HTTP-only"
+      },
+      "storeNonce": {
+        "name": "woo_store_nonce",
+        "purpose": "Token di sicurezza per le richieste Store API.",
+        "duration": "Fino a 12 ore",
+        "type": "First party, HTTP-only"
+      },
+      "sessionToken": {
+        "name": "storefront.session-token",
+        "purpose": "Mantiene l’accesso quando usa un account.",
+        "duration": "Sessione (vedere il browser)",
+        "type": "First party, HTTP-only"
+      },
+      "taxonomyPreview": {
+        "name": "woo_taxonomy_preview",
+        "purpose": "Anteprima interna opzionale della navigazione per categorie (strumenti interni).",
+        "duration": "Sessione",
+        "type": "First party"
+      },
+      "consentPrefs": {
+        "name": "g-food-cookie-consent (localStorage)",
+        "purpose": "Memorizza le scelte sui cookie e la versione per non chiedere di nuovo senza necessità.",
+        "duration": "Finché non cancella i dati del sito",
+        "type": "First party (memoria del browser)"
+      }
+    },
+    "checkoutTitle": "Checkout e pagamenti",
+    "checkoutBody": "Il pagamento può reindirizzare al sito WordPress/WooCommerce o a un fornitore di pagamenti. Lì possono essere impostati cookie propri o trattati dati secondo le loro informative. Usiamo i dati di pagamento solo per evadere l’ordine.",
+    "googleTitle": "Accesso con Google",
+    "googleBody": "Se usa l’accesso Google, Google tratta dati secondo le proprie norme. Riceviamo i dati di profilo necessari per creare o associare l’account del negozio.",
+    "rightsTitle": "I suoi diritti",
+    "rightsBody": "A seconda dei casi, può avere diritti LPD: informazione, rettifica, cancellazione, opposizione e in situazioni definite portabilità. Reclamo possibile presso l’IFPDT.",
+    "withdrawTitle": "Modificare o revocare il consenso",
+    "withdrawBody": "Può riaprire «Impostazioni cookie» nel piè di pagina per disattivare le categorie opzionali. I cookie necessari restano per il funzionamento di base.",
+    "updatesTitle": "Aggiornamenti",
+    "updatesBody": "Possiamo aggiornare questa informativa se cambiano i trattamenti o la legge. Modifiche rilevanti devono essere riflette qui e, se necessario, in una nuova versione del banner."
   }
 }

@@ -161,6 +161,8 @@
     "title": "Livraison",
     "intro": "Nous livrons en Suisse. Les délais et zones desservies peuvent varier ; les informations précises vous seront communiquées lors de la validation de votre commande.",
     "freeFrom": "Les frais de port sont offerts pour toute commande d'un montant total d'au moins {amount} CHF (TVA incluse).",
+    "freeShippingMissing": "Plus que <strong>{amount}</strong> pour la livraison offerte",
+    "freeShippingUnlocked": "Livraison offerte",
     "note": "Texte indicatif — conditions définitives confirmées au moment du paiement.",
     "close": "Fermer"
   },
@@ -205,7 +207,24 @@
     "registerErrorWpSync": "Nous n’avons pas pu créer votre compte : la boutique n’a pas pu joindre le site principal. Réessayez plus tard ou contactez-nous."
   },
   "footer": {
-    "impressum": "Impressum"
+    "impressum": "Impressum",
+    "privacy": "Confidentialité",
+    "cookieSettings": "Paramètres des cookies"
+  },
+  "cookieConsent": {
+    "title": "Cookies et technologies similaires",
+    "intro": "Nous utilisons des cookies et le stockage local pour faire fonctionner la boutique, le panier et—uniquement avec votre accord—pour mesurer l’usage et des offres pertinentes.",
+    "privacyLink": "Politique de confidentialité et protection des données",
+    "close": "Fermer",
+    "necessaryOnly": "Nécessaires uniquement",
+    "saveChoices": "Enregistrer les choix",
+    "acceptAll": "Tout accepter",
+    "categoryNecessaryTitle": "Strictement nécessaires",
+    "categoryNecessaryBody": "Indispensables aux fonctions de base (session panier, jetons de sécurité, connexion si vous choisissez un compte). Sans votre accord pour des cookies marketing ou analytiques optionnels.",
+    "categoryAnalyticsTitle": "Statistiques / analyse",
+    "categoryAnalyticsBody": "Nous aide à comprendre l’usage du site. Chargé seulement après votre accord.",
+    "categoryMarketingTitle": "Marketing",
+    "categoryMarketingBody": "Offres personnalisées ou remarketing partenaires. Chargé seulement après votre accord."
   },
   "impressum": {
     "metaTitle": "Impressum | G-Food",
@@ -227,5 +246,64 @@
     "contactFormUrl": "https://g-food.ch/contactez-nous/",
     "hoursLabel": "Horaires",
     "hours": "Lundi à vendredi : 08h00 – 17h00"
+  },
+  "privacy": {
+    "metaTitle": "Confidentialité | G-Food",
+    "metaDescription": "Informations sur le traitement des données personnelles et des cookies sur cette boutique par CoFood Sàrl.",
+    "title": "Confidentialité et protection des données",
+    "notLegalAdvice": "Ce texte vise la transparence ; il ne remplace pas un conseil juridique—adaptez-le à vos traitements réels et au droit suisse.",
+    "intro": "CoFood Sàrl (« nous ») exploite cette boutique en ligne. Nous traitons les données personnelles conformément à la loi fédérale sur la protection des données (LPD) et, lorsque les cookies ou technologies similaires ne sont pas strictement nécessaires, à la loi sur les télécommunications (LTC). Le Préposé fédéral à la protection des données et à la transparence (PFPDT) publie des lignes directrices sur les cookies et le suivi.",
+    "controllerTitle": "Responsable du traitement",
+    "controllerBody": "CoFood Sàrl, Route de Vevey 130, CH-1630 Bulle. Contact : voir l’Impressum.",
+    "purposesTitle": "Finalités",
+    "purposesBody": "Nous traitons des données pour présenter les produits, gérer panier et commandes, traiter les paiements via WooCommerce, les comptes clients, améliorer le service et—avec votre consentement lorsque requis—pour l’analyse ou le marketing.",
+    "cookiesTitle": "Cookies et stockage similaire",
+    "cookiesIntro": "Le tableau ci-dessous décrit les technologies typiques. Les cookies de session nécessaires au shop sont en principe considérés comme techniquement indispensables ; les scripts d’analyse ou marketing optionnels ne sont activés qu’après opt-in dans la bannière cookies.",
+    "cookieTableName": "Nom / clé",
+    "cookieTablePurpose": "Finalité",
+    "cookieTableDuration": "Durée",
+    "cookieTableType": "Portée",
+    "cookieRows": {
+      "cartToken": {
+        "name": "woo_cart_token",
+        "purpose": "Maintient votre session panier WooCommerce Store API.",
+        "duration": "Jusqu’à 7 jours",
+        "type": "Première partie, HTTP-only"
+      },
+      "storeNonce": {
+        "name": "woo_store_nonce",
+        "purpose": "Jeton de sécurité pour les requêtes Store API.",
+        "duration": "Jusqu’à 12 heures",
+        "type": "Première partie, HTTP-only"
+      },
+      "sessionToken": {
+        "name": "storefront.session-token",
+        "purpose": "Maintient votre connexion lorsque vous utilisez un compte.",
+        "duration": "Session (voir le navigateur)",
+        "type": "Première partie, HTTP-only"
+      },
+      "taxonomyPreview": {
+        "name": "woo_taxonomy_preview",
+        "purpose": "Aperçu interne optionnel de la navigation par catégories (outils internes).",
+        "duration": "Session",
+        "type": "Première partie"
+      },
+      "consentPrefs": {
+        "name": "g-food-cookie-consent (localStorage)",
+        "purpose": "Enregistre vos choix cookies et la version pour éviter de redemander inutilement.",
+        "duration": "Jusqu’à suppression des données du site",
+        "type": "Première partie (stockage navigateur)"
+      }
+    },
+    "checkoutTitle": "Commande et paiements",
+    "checkoutBody": "Le paiement peut rediriger vers WordPress/WooCommerce ou un prestataire de paiement. Ces sites peuvent déposer leurs propres cookies ou traiter des données selon leurs mentions d’information. Nous utilisons les données de paiement uniquement pour exécuter votre commande.",
+    "googleTitle": "Connexion avec Google",
+    "googleBody": "Si vous utilisez Google, Google traite des données selon ses règles. Nous recevons les informations de profil nécessaires pour créer ou associer votre compte boutique.",
+    "rightsTitle": "Vos droits",
+    "rightsBody": "Selon les cas, vous pouvez exercer des droits LPD : information, rectification, suppression, opposition, portabilité dans certaines situations. Réclamation possible auprès du PFPDT.",
+    "withdrawTitle": "Modifier ou retirer le consentement",
+    "withdrawBody": "Via « Paramètres des cookies » dans le pied de page, vous pouvez désactiver les catégories optionnelles à tout moment. Les cookies nécessaires restent pour le fonctionnement de base.",
+    "updatesTitle": "Mises à jour",
+    "updatesBody": "Nous pouvons adapter cette notice si nos traitements ou la loi évoluent. Les changements importants doivent y figurer et, si besoin, dans une nouvelle version de la bannière."
   }
 }

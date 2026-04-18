@@ -77,6 +77,9 @@ export function TopNav() {
         >
           <HStack gap={{ base: 3, md: 4 }} wrap="wrap">
             <NavDeliveryDialog />
+            <Link variant="underline" href="/privacy">
+              {t("footer.privacy")}
+            </Link>
             <Link variant="underline" href="/impressum">
               {t("footer.impressum")}
             </Link>

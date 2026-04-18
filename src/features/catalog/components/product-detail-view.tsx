@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CartQuantityRow } from "@/components/cart-quantity-row";
 import { ProductCategoryBreadcrumb } from "@/features/catalog/components/product-category-breadcrumb";
 import { ProductImagePlaceholder } from "@/features/catalog/components/product-image-placeholder";
+import { ProductPrice } from "@/features/catalog/components/product-price";
 import { useCartStore } from "@/features/cart/store/cart-store";
 import type { RegimeTerm } from "@/lib/regime-term";
 import type { Category, Product } from "@/server/schemas/catalog";
@@ -19,14 +20,6 @@ type ProductDetailViewProps = {
   /** `pa_regime` (diet) terms; computed on the server. */
   regimeTerms?: RegimeTerm[];
 };
-
-function formatPrice(amount: string | undefined, locale: string) {
-  if (!amount) {
-    return "-";
-  }
-  const value = Number(amount) / 100;
-  return new Intl.NumberFormat(locale, { style: "currency", currency: "CHF" }).format(value);
-}
 
 function imageProxyUrl(src: string, opts: { thumb?: boolean }) {
   const params = new URLSearchParams({
@@ -160,9 +153,7 @@ export function ProductDetailView({
             <Badge colorPalette={product.is_in_stock ? "green" : "red"} variant="subtle" fontSize="sm">
               {product.is_in_stock ? t("inStock") : t("outOfStock")}
             </Badge>
-            <Text fontSize="2xl" fontWeight="bold">
-              {formatPrice(product.prices?.price, locale)}
-            </Text>
+            <ProductPrice product={product} locale={locale} size="lg" />
           </HStack>
           {origineTerms.length > 0 ? (
             <Stack gap={2} align="start">

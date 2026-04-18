@@ -161,6 +161,8 @@
     "title": "Lieferung",
     "intro": "Wir liefern in der Schweiz. Lieferzeiten und Gebiete können variieren; Details bestätigen wir bei Ihrer Bestellung.",
     "freeFrom": "Der Versand ist kostenlos ab einem Bestellwert von mindestens {amount} CHF (inkl. MWSt.).",
+    "freeShippingMissing": "Nur noch <strong>{amount}</strong> bis zur kostenlosen Lieferung",
+    "freeShippingUnlocked": "Kostenlose Lieferung",
     "note": "Hinweis — endgültige Konditionen werden an der Kasse bestätigt.",
     "close": "Schließen"
   },
@@ -205,7 +207,24 @@
     "registerErrorWpSync": "Ihr Konto konnte nicht erstellt werden: Der Shop konnte die Hauptwebsite nicht erreichen. Bitte später erneut versuchen oder uns kontaktieren."
   },
   "footer": {
-    "impressum": "Impressum"
+    "impressum": "Impressum",
+    "privacy": "Datenschutz",
+    "cookieSettings": "Cookie-Einstellungen"
+  },
+  "cookieConsent": {
+    "title": "Cookies und ähnliche Technologien",
+    "intro": "Wir verwenden Cookies und lokalen Speicher für den Shop, den Warenkorb und—nur mit Ihrer Zustimmung—für Statistiken und relevante Angebote.",
+    "privacyLink": "Datenschutzerklärung",
+    "close": "Schliessen",
+    "necessaryOnly": "Nur notwendige",
+    "saveChoices": "Auswahl speichern",
+    "acceptAll": "Alle akzeptieren",
+    "categoryNecessaryTitle": "Unbedingt erforderlich",
+    "categoryNecessaryBody": "Für Grundfunktionen des Shops (Warenkorb, Sicherheitstoken, Anmeldung). Diese werden ohne Zustimmung zu optionalen Marketing- oder Analyse-Cookies gesetzt.",
+    "categoryAnalyticsTitle": "Statistik / Analyse",
+    "categoryAnalyticsBody": "Hilft uns zu verstehen, wie die Seite genutzt wird. Wird erst nach Opt-in geladen.",
+    "categoryMarketingTitle": "Marketing",
+    "categoryMarketingBody": "Personalisierte Angebote oder Remarketing von Partnern. Wird erst nach Opt-in geladen."
   },
   "impressum": {
     "metaTitle": "Impressum | G-Food",
@@ -227,5 +246,64 @@
     "contactFormUrl": "https://g-food.ch/contactez-nous/",
     "hoursLabel": "Öffnungszeiten",
     "hours": "Montag bis Freitag: 08:00 – 17:00"
+  },
+  "privacy": {
+    "metaTitle": "Datenschutz | G-Food",
+    "metaDescription": "Informationen zur Verarbeitung personenbezogener Daten und Cookies in diesem Shop durch CoFood Sàrl.",
+    "title": "Datenschutz",
+    "notLegalAdvice": "Dieser Text dient der Transparenz und ersetzt keine Rechtsberatung; bitte an Ihre tatsächliche Verarbeitung und schweizerisches Recht anpassen.",
+    "intro": "CoFood Sàrl („wir“) betreibt diesen Online-Shop. Wir verarbeiten Personendaten gemäss dem Bundesgesetz über den Datenschutz (DSG) und—soweit Cookies oder ähnliche Technologien nicht zwingend notwendig sind—gemäss dem Fernmeldegesetz (FMG). Das Eidgenössische Datenschutz- und Öffentlichkeitsbeauftragte (EDÖB) veröffentlicht Hinweise zu Cookies und Tracking.",
+    "controllerTitle": "Verantwortlicher",
+    "controllerBody": "CoFood Sàrl, Route de Vevey 130, CH-1630 Bulle. Kontakt: siehe Impressum.",
+    "purposesTitle": "Zwecke",
+    "purposesBody": "Wir verarbeiten Daten zur Darstellung von Produkten, Verwaltung von Warenkorb und Bestellungen, Zahlungsabwicklung über WooCommerce, Kundenkonten, Serviceverbesserung und—nur mit Ihrer Zustimmung, wenn erforderlich—für Analyse oder Marketing.",
+    "cookiesTitle": "Cookies und ähnlicher Speicher",
+    "cookiesIntro": "Die Tabelle nennt typische Technologien. Session-Cookies für den Shop gelten in der Regel als technisch notwendig; optionale Analyse- oder Marketing-Skripte aktivieren wir erst nach Opt-in im Cookie-Dialog.",
+    "cookieTableName": "Name / Schlüssel",
+    "cookieTablePurpose": "Zweck",
+    "cookieTableDuration": "Dauer",
+    "cookieTableType": "Umfang",
+    "cookieRows": {
+      "cartToken": {
+        "name": "woo_cart_token",
+        "purpose": "Hält Ihre WooCommerce Store-API-Warenkorbsitzung.",
+        "duration": "Bis zu 7 Tage",
+        "type": "First Party, HTTP-only"
+      },
+      "storeNonce": {
+        "name": "woo_store_nonce",
+        "purpose": "Sicherheitstoken für Store-API-Anfragen.",
+        "duration": "Bis zu 12 Stunden",
+        "type": "First Party, HTTP-only"
+      },
+      "sessionToken": {
+        "name": "storefront.session-token",
+        "purpose": "Hält Ihre Anmeldung bei Nutzung eines Kontos.",
+        "duration": "Sitzung (siehe Browser)",
+        "type": "First Party, HTTP-only"
+      },
+      "taxonomyPreview": {
+        "name": "woo_taxonomy_preview",
+        "purpose": "Optionale interne Vorschau der Kategorienavigation (interne Tools).",
+        "duration": "Sitzung",
+        "type": "First Party"
+      },
+      "consentPrefs": {
+        "name": "g-food-cookie-consent (localStorage)",
+        "purpose": "Speichert Ihre Cookie-Auswahl und Version, damit wir nicht unnötig erneut fragen.",
+        "duration": "Bis Sie Websitedaten löschen",
+        "type": "First Party (Browser-Speicher)"
+      }
+    },
+    "checkoutTitle": "Checkout und Zahlungen",
+    "checkoutBody": "Die Zahlung kann auf die WordPress-/WooCommerce-Seite oder einen Zahlungsdienstleister umleiten. Dort können eigene Cookies gesetzt oder Daten gemäss deren Datenschutzhinweisen verarbeitet werden. Wir nutzen Zahlungsdaten nur zur Erfüllung Ihrer Bestellung.",
+    "googleTitle": "Anmeldung mit Google",
+    "googleBody": "Bei Nutzung von «Mit Google anmelden» verarbeitet Google Daten nach dessen Richtlinien. Wir erhalten die für Kontoanlage oder -zuordnung nötigen Profildaten.",
+    "rightsTitle": "Ihre Rechte",
+    "rightsBody": "Je nach Situation haben Sie gemäss DSG unter anderem Rechte auf Auskunft, Berichtigung, Löschung, Widerspruch und unter Umständen Datenübertragbarkeit. Beschwerde beim EDÖB möglich.",
+    "withdrawTitle": "Einwilligung ändern oder widerrufen",
+    "withdrawBody": "Über «Cookie-Einstellungen» in der Fusszeile können Sie optionale Kategorien jederzeit abschalten. Notwendige Cookies bleiben für den Grundbetrieb.",
+    "updatesTitle": "Änderungen",
+    "updatesBody": "Wir können diese Hinweise bei Änderungen der Verarbeitung oder der Gesetze anpassen. Wesentliche Änderungen sollten hier und bei Bedarf über eine neue Banner-Version kenntlich gemacht werden."
   }
 }

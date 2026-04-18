@@ -161,6 +161,8 @@
     "title": "Delivery",
     "intro": "We deliver within Switzerland. Timeframes and service areas may vary; we will confirm details when you place your order.",
     "freeFrom": "Delivery is free on orders of CHF {amount} or more (incl. VAT).",
+    "freeShippingMissing": "Only <strong>{amount}</strong> away from free delivery",
+    "freeShippingUnlocked": "Free delivery unlocked",
     "note": "Summary information only — final terms are confirmed at checkout.",
     "close": "Close"
   },
@@ -205,7 +207,24 @@
     "registerErrorWpSync": "We could not create your account right now because the shop cannot talk to the site backend. Please try again later or contact us."
   },
   "footer": {
-    "impressum": "Legal notice"
+    "impressum": "Legal notice",
+    "privacy": "Privacy",
+    "cookieSettings": "Cookie settings"
+  },
+  "cookieConsent": {
+    "title": "Cookies and similar technologies",
+    "intro": "We use cookies and local storage to run the shop, keep your cart, and—only if you agree—to measure use and show relevant offers.",
+    "privacyLink": "Privacy and data protection notice",
+    "close": "Close",
+    "necessaryOnly": "Necessary only",
+    "saveChoices": "Save choices",
+    "acceptAll": "Accept all",
+    "categoryNecessaryTitle": "Strictly necessary",
+    "categoryNecessaryBody": "Required for basic shop functions (cart session, security tokens, sign-in when you choose it). These are set without optional marketing or analytics consent.",
+    "categoryAnalyticsTitle": "Statistics / analytics",
+    "categoryAnalyticsBody": "Helps us understand how the site is used (e.g. page views). Not loaded until you opt in.",
+    "categoryMarketingTitle": "Marketing",
+    "categoryMarketingBody": "Personalised offers or remarketing tags from partners. Not loaded until you opt in."
   },
   "impressum": {
     "metaTitle": "Legal notice | G-Food",
@@ -227,5 +246,64 @@
     "contactFormUrl": "https://g-food.ch/contactez-nous/",
     "hoursLabel": "Opening hours",
     "hours": "Monday to Friday: 08:00 – 17:00"
+  },
+  "privacy": {
+    "metaTitle": "Privacy | G-Food",
+    "metaDescription": "Information on how CoFood Sàrl processes personal data and cookies on this shop.",
+    "title": "Privacy and data protection",
+    "notLegalAdvice": "This notice is provided for transparency. It does not replace legal advice; please align it with your actual processing and Swiss law.",
+    "intro": "CoFood Sàrl (“we”) operates this online shop. We process personal data in line with the Swiss Federal Act on Data Protection (FADP) and, where cookies or similar technologies are not strictly necessary, the Telecommunications Act (TCA). The Swiss Federal Data Protection and Information Commissioner (FDPIC) publishes guidance on cookies and tracking.",
+    "controllerTitle": "Controller",
+    "controllerBody": "CoFood Sàrl, Route de Vevey 130, CH-1630 Bulle. Contact: see our legal notice.",
+    "purposesTitle": "Purposes",
+    "purposesBody": "We process data to present products, manage your cart and orders, handle payments via our WooCommerce backend, provide customer accounts, improve our service, and—only with your consent where required—for analytics or marketing.",
+    "cookiesTitle": "Cookies and similar storage",
+    "cookiesIntro": "The table below lists typical technologies we use. Session cookies needed for the shop are generally considered technically necessary; optional analytics or marketing scripts are only activated after you opt in in the cookie dialog.",
+    "cookieTableName": "Name / key",
+    "cookieTablePurpose": "Purpose",
+    "cookieTableDuration": "Duration",
+    "cookieTableType": "Scope",
+    "cookieRows": {
+      "cartToken": {
+        "name": "woo_cart_token",
+        "purpose": "Keeps your WooCommerce Store API cart session.",
+        "duration": "Up to 7 days",
+        "type": "First party, HTTP-only"
+      },
+      "storeNonce": {
+        "name": "woo_store_nonce",
+        "purpose": "Security token for Store API requests.",
+        "duration": "Up to 12 hours",
+        "type": "First party, HTTP-only"
+      },
+      "sessionToken": {
+        "name": "storefront.session-token",
+        "purpose": "Keeps you signed in when you use an account.",
+        "duration": "Session (see browser)",
+        "type": "First party, HTTP-only"
+      },
+      "taxonomyPreview": {
+        "name": "woo_taxonomy_preview",
+        "purpose": "Optional internal preview of category navigation (staff tools).",
+        "duration": "Session",
+        "type": "First party"
+      },
+      "consentPrefs": {
+        "name": "g-food-cookie-consent (localStorage)",
+        "purpose": "Stores your cookie choices and version so we do not ask unnecessarily.",
+        "duration": "Until you clear site data",
+        "type": "First party (browser storage)"
+      }
+    },
+    "checkoutTitle": "Checkout and payments",
+    "checkoutBody": "Completing payment may redirect you to our WordPress / WooCommerce site or a payment provider. That site or provider may set its own cookies or process data under its privacy policy. We only use payment data to fulfil your order.",
+    "googleTitle": "Sign-in with Google",
+    "googleBody": "If you use Google sign-in, Google processes data according to Google’s policies. We receive basic profile details needed to create or match your shop account.",
+    "rightsTitle": "Your rights",
+    "rightsBody": "Depending on the situation, you may have rights under the FADP including information, correction, deletion, objection, and data portability in certain cases. You may lodge a complaint with the FDPIC.",
+    "withdrawTitle": "Changing or withdrawing consent",
+    "withdrawBody": "You can reopen “Cookie settings” in the footer at any time to turn optional categories off. Necessary cookies remain for basic shop operation.",
+    "updatesTitle": "Updates",
+    "updatesBody": "We may update this notice when our processing or the law changes. Material changes should be reflected here and, where needed, in the cookie banner version."
   }
 }

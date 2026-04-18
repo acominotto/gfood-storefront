@@ -1,6 +1,7 @@
 "use client";
 
 import { DeliveryInfoDialogControlled } from "@/components/delivery-info-dialog";
+import { useCookieConsentStore } from "@/features/cookie-consent/cookie-consent-store";
 import { NavCartButton } from "@/components/nav-cart-button";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
@@ -8,7 +9,16 @@ import { Link } from "@/components/ui/link";
 import { LOCALE_NAV_META } from "@/lib/locale-nav-meta";
 import { usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { Box, Button as ChakraButton, Grid, HStack, Image, Separator, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button as ChakraButton,
+  Grid,
+  HStack,
+  Image,
+  Separator,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -24,6 +34,7 @@ export function MobileBottomBar() {
   const pathForLocaleSwitch = pathname?.startsWith("/") ? pathname : "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [deliveryOpen, setDeliveryOpen] = useState(false);
+  const openCookieSettings = useCookieConsentStore((s) => s.openSettings);
 
   const isShopActive = pathname === "/";
 
@@ -111,6 +122,25 @@ export function MobileBottomBar() {
           </Drawer.Header>
           <Drawer.Body py={4}>
             <Stack gap={1} align="stretch">
+              <Button asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
+                <Link href="/privacy" onClick={() => setMenuOpen(false)}>
+                  {tFooter("privacy")}
+                </Link>
+              </Button>
+
+              <ChakraButton
+                variant="ghost"
+                justifyContent="flex-start"
+                size="lg"
+                fontWeight="normal"
+                onClick={() => {
+                  setMenuOpen(false);
+                  queueMicrotask(() => openCookieSettings());
+                }}
+              >
+                {tFooter("cookieSettings")}
+              </ChakraButton>
+
               <Button asChild variant="ghost" justifyContent="flex-start" size="lg" fontWeight="normal">
                 <Link href="/impressum" onClick={() => setMenuOpen(false)}>
                   {tFooter("impressum")}
